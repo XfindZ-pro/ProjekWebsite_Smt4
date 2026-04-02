@@ -3,7 +3,7 @@
 class Controller {
     // Fungsi untuk memanggil file View
     public function view($view, $data = []) {
-        require_once '../app/views/' . $view . '.php';
+        require_once '../views/' . $view . '.php'; // Benar
     }
 
     // Fungsi untuk memanggil file Model (untuk database)
