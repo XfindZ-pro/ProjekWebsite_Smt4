@@ -3,5 +3,5 @@
 require_once '../app/init.php';
 
 // Menjalankan class App (yang nanti akan kita buat di folder Core)
-// $app = new App(); 
+ $app = new App(); 
 ?>

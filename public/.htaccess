@@ -1,0 +1,7 @@
+Options -Indexes
+RewriteEngine On
+# Jika yang diketik bukan nama folder atau nama file yang ada
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+# Arahkan semuanya ke index.php dan simpan URL-nya di variabel 'url'
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
