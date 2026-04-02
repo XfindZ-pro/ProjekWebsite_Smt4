@@ -1,0 +1,8 @@
+# Mengabaikan folder dependency (jika nanti pakai Composer atau NPM)
+vendor/
+node_modules/
+
+# Mengabaikan konfigurasi editor/OS
+.vscode/
+.DS_Store
+Thumbs.db
