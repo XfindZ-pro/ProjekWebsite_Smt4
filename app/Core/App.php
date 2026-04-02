@@ -9,16 +9,22 @@ class App {
     public function __construct() {
         $url = $this->parseURL();
         
-        // 1. Setup Controller
+      // 1. Setup Controller
+      if(isset($url[0])) {
         // Cek apakah file controller-nya ada
-        if(isset($url[0]) && file_exists('../app/Controllers/' . $url[0] . '.php')) {
+        if(file_exists('../app/Controllers/' . $url[0] . '.php')) {
             $this->controller = $url[0];
             unset($url[0]);
+        } else {
+            // JIKA CONTROLLER TIDAK ADA -> Arahkan ke NotFound
+            $this->controller = 'NotFound';
+            unset($url[0]);
         }
-        
-        // Panggil dan instansiasi controller-nya
-        require_once '../app/Controllers/' . $this->controller . '.php';
-        $this->controller = new $this->controller;
+    }
+    
+    // Panggil dan instansiasi controller-nya
+    require_once '../app/Controllers/' . $this->controller . '.php';
+    $this->controller = new $this->controller;
 
         // 2. Setup Method
         if(isset($url[1])) {

@@ -1,8 +1,8 @@
 <?php
-// Sesuaikan "Projek" dengan nama folder di htocs/www Laragon kamu
-define('BASEURL', 'http://localhost/Projek/public');
+// Sesuaikan BASEURL karena root Laragon sudah langsung ke folder public
+define('BASEURL', 'http://localhost');
 
-// Pengaturan Database (Kita biarkan kosong dulu sesuai permintaanmu)
+// Pengaturan Database
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
 define('DB_PASS', '');
