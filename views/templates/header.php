@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Valora - Transformasi Limbah Menjadi Nilai</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
 </head>
 <body class="bg-slate-50 font-sans antialiased text-slate-800 flex flex-col min-h-screen">
 
@@ -38,7 +41,7 @@
             </div>
         </div>
 
-        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-100 shadow-lg absolute w-full">
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-100 shadow-lg absolute w-full z-50">
             <div class="px-4 pt-2 pb-4 space-y-2">
                 <a href="<?= BASEURL; ?>" class="block px-3 py-2 rounded-md text-base font-medium <?= ($data['aktif'] == 'beranda') ? 'text-emerald-600 bg-emerald-50' : 'text-slate-600 hover:text-emerald-600 hover:bg-slate-50' ?>">Beranda</a>
                 <a href="<?= BASEURL; ?>/katalog" class="block px-3 py-2 rounded-md text-base font-medium <?= ($data['aktif'] == 'katalog') ? 'text-emerald-600 bg-emerald-50' : 'text-slate-600 hover:text-emerald-600 hover:bg-slate-50' ?>">Katalog</a>
