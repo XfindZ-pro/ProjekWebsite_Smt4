@@ -103,7 +103,7 @@ mv ProjekWebsite_Smt4 /opt/lampp/htdocs/
 
 **3. Buat database MySQL**
 ```sql
-CREATE DATABASE valora_db;
+CREATE DATABASE pemweb;
 ```
 
 **4. Konfigurasi koneksi database**
@@ -113,7 +113,7 @@ Buka file di `config/` dan sesuaikan pengaturan berikut:
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
 define('DB_PASS', '');
-define('DB_NAME', 'valora_db');
+define('DB_NAME', 'pemweb');
 ```
 
 **5. Jalankan aplikasi**
