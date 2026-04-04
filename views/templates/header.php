@@ -37,8 +37,18 @@
                 </div>
                 
                 <div class="hidden md:flex items-center space-x-4">
-                    <a href="<?= BASEURL; ?>/login" class="text-emerald-600 font-medium hover:text-emerald-700 transition">Masuk</a>
-                    <a href="<?= BASEURL; ?>/register" class="bg-emerald-600 text-white px-5 py-2 rounded-lg font-medium hover:bg-emerald-700 transition shadow-md hover:shadow-lg transform hover:-translate-y-0.5">Daftar</a>
+                    <?php if(isset($_SESSION['user_nama'])) : ?>
+                        <div class="flex items-center space-x-3 bg-slate-50 px-4 py-2 rounded-full border border-slate-200 cursor-pointer hover:bg-slate-100 transition shadow-sm">
+                            <span class="text-slate-700 font-bold text-sm tracking-wide"><?= $_SESSION['user_nama']; ?></span>
+                            <img src="https://ui-avatars.com/api/?name=<?= urlencode($_SESSION['user_nama']); ?>&background=10b981&color=fff&size=512" 
+                                 alt="Profil" 
+                                 class="w-10 h-10 rounded-full object-cover border-2 border-emerald-500 shadow-sm">
+                        </div>
+                        <a href="<?= BASEURL; ?>/logout" class="text-red-500 font-medium hover:text-red-700 transition text-sm ml-2">Keluar</a>
+                    <?php else : ?>
+                        <a href="<?= BASEURL; ?>/login" class="text-emerald-600 font-medium hover:text-emerald-700 transition">Masuk</a>
+                        <a href="<?= BASEURL; ?>/register" class="bg-emerald-600 text-white px-5 py-2 rounded-lg font-medium hover:bg-emerald-700 transition shadow-md hover:shadow-lg transform hover:-translate-y-0.5">Daftar</a>
+                    <?php endif; ?>
                 </div>
 
                 <div class="md:hidden flex items-center">

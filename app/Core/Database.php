@@ -29,5 +29,10 @@ class Database {
         }
     }
 
+    // Tambahkan fungsi ini untuk memberikan akses koneksi PDO ke Model
+    public function conn() {
+        return $this->dbh;
+    }
+
     // Nanti di bawah sini kita bisa tambahkan fungsi query(), bind(), dan execute() untuk CRUD data
 }
