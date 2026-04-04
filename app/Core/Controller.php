@@ -3,10 +3,15 @@
 class Controller {
     // Fungsi untuk memanggil file View
     public function view($view, $data = []) {
-        require_once '../views/' . $view . '.php'; // Benar
+        
+        // Cek koneksi database setiap kali view dipanggil
+        $db = new Database();
+        $data['db_status'] = $db->isConnected;
+
+        require_once '../views/' . $view . '.php';
     }
 
-    // Fungsi untuk memanggil file Model (untuk database)
+    // Fungsi untuk memanggil file Model
     public function model($model) {
         require_once '../app/Models/' . $model . '.php';
         return new $model;

@@ -5,17 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Valora - Transformasi Limbah Menjadi Nilai</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    
 </head>
 <body class="bg-slate-50 font-sans antialiased text-slate-800 flex flex-col min-h-screen">
 
     <nav class="bg-white shadow-sm sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
-                <div class="flex-shrink-0 flex items-center">
-                    <a href="<?= BASEURL; ?>" class="text-2xl font-extrabold text-emerald-600 tracking-wider">
+            <div class="flex-shrink-0 flex items-center">
+                    <?php
+                        // Logika warna status database
+                        if (isset($data['db_status']) && $data['db_status'] === true) {
+                            $bg_status = "bg-emerald-100 text-emerald-700 border-emerald-300 shadow-sm shadow-emerald-200";
+                            $title_status = "Database Terhubung!";
+                        } else {
+                            $bg_status = "bg-red-100 text-red-600 border-red-300 shadow-sm shadow-red-200 animate-pulse";
+                            $title_status = "Database Terputus / Tidak Ditemukan!";
+                        }
+                    ?>
+                    <a href="<?= BASEURL; ?>" 
+                       title="<?= $title_status ?>"
+                       class="text-2xl font-extrabold tracking-wider px-3 py-1 rounded-lg border <?= $bg_status ?> transition-all duration-300">
                         VALORA
                     </a>
                 </div>
@@ -27,8 +37,8 @@
                 </div>
                 
                 <div class="hidden md:flex items-center space-x-4">
-                    <a href="#" class="text-emerald-600 font-medium hover:text-emerald-700 transition">Masuk</a>
-                    <a href="#" class="bg-emerald-600 text-white px-5 py-2 rounded-lg font-medium hover:bg-emerald-700 transition shadow-md hover:shadow-lg transform hover:-translate-y-0.5">Daftar</a>
+                    <a href="<?= BASEURL; ?>/login" class="text-emerald-600 font-medium hover:text-emerald-700 transition">Masuk</a>
+                    <a href="<?= BASEURL; ?>/register" class="bg-emerald-600 text-white px-5 py-2 rounded-lg font-medium hover:bg-emerald-700 transition shadow-md hover:shadow-lg transform hover:-translate-y-0.5">Daftar</a>
                 </div>
 
                 <div class="md:hidden flex items-center">
@@ -48,8 +58,8 @@
                 <a href="<?= BASEURL; ?>/tentang" class="block px-3 py-2 rounded-md text-base font-medium <?= ($data['aktif'] == 'tentang') ? 'text-emerald-600 bg-emerald-50' : 'text-slate-600 hover:text-emerald-600 hover:bg-slate-50' ?>">Tentang Kami</a>
                 
                 <div class="border-t border-slate-100 pt-4 flex flex-col space-y-3">
-                    <a href="#" class="block text-center text-emerald-600 font-medium py-2 hover:bg-emerald-50 rounded-lg border border-emerald-600">Masuk</a>
-                    <a href="#" class="block text-center bg-emerald-600 text-white py-2 rounded-lg font-medium hover:bg-emerald-700">Daftar</a>
+                    <a href="<?= BASEURL; ?>/login" class="block text-center text-emerald-600 font-medium py-2 hover:bg-emerald-50 rounded-lg border border-emerald-600">Masuk</a>
+                    <a href="<?= BASEURL; ?>/register" class="block text-center bg-emerald-600 text-white py-2 rounded-lg font-medium hover:bg-emerald-700">Daftar</a>
                 </div>
             </div>
         </div>
