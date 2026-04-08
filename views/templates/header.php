@@ -38,11 +38,17 @@
                 
                 <div class="hidden md:flex items-center space-x-4">
                     <?php if(isset($_SESSION['user_nama'])) : ?>
+                        <?php
+                            // FIX: Logika untuk menentukan URL foto di Header
+                            $headerAvatarUrl = !empty($_SESSION['user_foto']) 
+                                ? (preg_match('/^(https?:\/\/|\/)/', $_SESSION['user_foto']) ? htmlspecialchars($_SESSION['user_foto']) : BASEURL . '/' . htmlspecialchars($_SESSION['user_foto'])) 
+                                : "https://ui-avatars.com/api/?name=" . urlencode($_SESSION['user_nama']) . "&background=10b981&color=fff&size=512";
+                        ?>
                         <a href="<?= BASEURL; ?>/profile" class="flex items-center space-x-3 bg-slate-50 px-4 py-2 rounded-full border border-slate-200 hover:bg-slate-100 transition shadow-sm">
-                            <span class="text-slate-700 font-bold text-sm tracking-wide"><?= $_SESSION['user_nama']; ?></span>
-                            <img src="https://ui-avatars.com/api/?name=<?= urlencode($_SESSION['user_nama']); ?>&background=10b981&color=fff&size=512" 
+                            <span class="text-slate-700 font-bold text-sm tracking-wide"><?= htmlspecialchars($_SESSION['user_nama']); ?></span>
+                            <img src="<?= $headerAvatarUrl; ?>" 
                                  alt="Profil" 
-                                 class="w-10 h-10 rounded-full object-cover border-2 border-emerald-500 shadow-sm">
+                                 class="w-10 h-10 rounded-full object-cover border-2 border-emerald-500 shadow-sm bg-white">
                         </a>
                         <a href="<?= BASEURL; ?>/logout" class="text-red-500 font-medium hover:text-red-700 transition text-sm ml-2">Keluar</a>
                     <?php else : ?>

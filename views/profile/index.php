@@ -1,5 +1,5 @@
 <main class="flex-1 bg-slate-50 py-10">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" integrity="sha512-4K3pqhydIUhBkTR0DFgMvbiEpcq7wRND1dGnlE7sP4cgWBa3MQr7cgjXuBvN3Ld8C7kFgZCKR3Kb1dlMpgpgSQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
 
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="mb-8 text-center">
@@ -130,7 +130,7 @@
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js" integrity="sha512-6A6o2vT/UVy0WQ10kY3btBKMqCkz6M1ZW4D8WwL6cj6xgNQwsgG3qA8w3jI3G15ewkb0X9uj/1MruQCBtS5ZLw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     
     <script>
         let baseUrl = '<?= BASEURL; ?>';
@@ -170,7 +170,6 @@
             isGifUpload = false;
             photoFileInput.value = '';
             
-            // Reset container gambar
             imageContainer.innerHTML = '<span class="text-slate-400 text-sm">Belum ada foto yang dipilih</span>';
             
             if (cropper) {
@@ -209,9 +208,6 @@
         document.getElementById('closeEditModalButton').addEventListener('click', closePhotoEdit);
         document.getElementById('cancelEditButton').addEventListener('click', closePhotoEdit);
 
-        // ==========================================
-        // LOGIKA PEMROSESAN FOTO (SANGAT ROBUST)
-        // ==========================================
         photoFileInput.addEventListener('change', (event) => {
             const file = event.target.files[0];
             if (!file) return;
@@ -223,9 +219,9 @@
                 return;
             }
 
-            // CEK KONEKSI LIBRARY: Jika berjalan di localhost tanpa internet, Cropper tidak akan terdefinisi
-            if (typeof Cropper === 'undefined') {
-                alert('Library pemotong gambar belum siap. Pastikan komputer Anda terhubung ke internet untuk memuat fitur ini.');
+            // Pengecekan window.Cropper yang lebih akurat
+            if (!window.Cropper) {
+                alert('Library pemotong gambar gagal dimuat oleh browser. Coba refresh halaman ini.');
                 photoFileInput.value = '';
                 return;
             }
@@ -243,13 +239,18 @@
                     cropper = null;
                 }
                 
-                // FIX UTAMA: Hancurkan dan buat ulang elemen <img> sepenuhnya untuk mereset semua error
-                imageContainer.innerHTML = `<img id="cropperImage" src="${e.target.result}" alt="Preview" style="display: block; max-width: 100%; max-height: 360px; margin: 0 auto;">`;
+                // Kosongkan container
+                imageContainer.innerHTML = '';
                 
-                // Tangkap elemen yang baru saja dibuat
-                const newCropperImage = document.getElementById('cropperImage');
+                // FIX 3: Buat elemen gambar secara native melalui JavaScript agar browser tahu persis kapan selesai dimuat
+                const newImg = document.createElement('img');
+                newImg.id = 'cropperImage';
+                newImg.style.display = 'block';
+                newImg.style.maxWidth = '100%';
+                newImg.style.maxHeight = '360px';
+                newImg.style.margin = '0 auto';
 
-                newCropperImage.onload = () => {
+                newImg.onload = function() {
                     if (isGifUpload) {
                         saveEditButton.disabled = false;
                         saveEditButton.textContent = 'Simpan';
@@ -257,7 +258,7 @@
                     }
 
                     try {
-                        cropper = new Cropper(newCropperImage, {
+                        cropper = new Cropper(newImg, {
                             aspectRatio: photoAspect[currentPhotoType],
                             viewMode: 1,
                             background: true,
@@ -278,11 +279,15 @@
                     }
                 };
 
-                newCropperImage.onerror = () => {
+                newImg.onerror = function() {
                     alert("File gambar korup atau tidak dapat dibaca.");
                     saveEditButton.disabled = true;
                     saveEditButton.textContent = 'Simpan';
                 };
+
+                // Masukkan gambar ke DOM dan isi SRC-nya
+                imageContainer.appendChild(newImg);
+                newImg.src = e.target.result;
             };
             
             reader.readAsDataURL(file);
