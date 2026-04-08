@@ -12,7 +12,7 @@ class Database {
 
     public function __construct() {
         // Data Source Name (DSN)
-        $dsn = 'mysql:host=' . $this->host . ';dbname=' . $this->db_name;
+        $dsn = 'mysql:host=' . $this->host . ';port=' . DB_PORT . ';dbname=' . $this->db_name . ';charset=utf8';
 
         // Optimasi PDO
         $option = [

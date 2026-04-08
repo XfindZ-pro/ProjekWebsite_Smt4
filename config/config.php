@@ -10,10 +10,12 @@ $host = $_SERVER['HTTP_HOST'];
 define('BASEURL', $protocol . $host);
 
 // Pengaturan Database
-// Catatan: Saat nanti diupload ke hosting, pastikan kamu juga menggabungkan/menyesuaikan username, password, dan nama DB ini sesuai dengan yang diberikan oleh pihak hosting.
-define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'pemweb');
+// Isi nilai berikut dengan data MySQL dari provider hosting gratis seperti filess.io.
+// Contoh yang benar: host tanpa http://, port MySQL, username, password, dan nama database.
+define('DB_HOST', 'sq-7tm.h.filess.io');
+define('DB_PORT', '61002');
+define('DB_USER', 'pemweb_properlyby');
+define('DB_PASS', '94da42107be4051036514940cf31d63f1b52dc13');
+define('DB_NAME', 'pemweb_properlyby');
 
 ?>
