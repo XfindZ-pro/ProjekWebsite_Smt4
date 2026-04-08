@@ -38,9 +38,10 @@ class AkunModel {
         $password_hash = password_hash($data['password'], PASSWORD_DEFAULT);
         $peran = 'pengguna';
         $foto_profil = null;
+        $foto_banner = null;
 
-        $query = "INSERT INTO akun (akun_id, nama, email, password, peran, foto_profil) 
-                  VALUES (:akun_id, :nama, :email, :password, :peran, :foto_profil)";
+        $query = "INSERT INTO akun (akun_id, nama, email, password, peran, foto_profil, foto_banner) 
+                  VALUES (:akun_id, :nama, :email, :password, :peran, :foto_profil, :foto_banner)";
         
         $stmt = $this->db->conn()->prepare($query);
         $stmt->bindParam(':akun_id', $akun_id);
@@ -49,6 +50,7 @@ class AkunModel {
         $stmt->bindParam(':password', $password_hash);
         $stmt->bindParam(':peran', $peran);
         $stmt->bindParam(':foto_profil', $foto_profil, PDO::PARAM_NULL);
+        $stmt->bindParam(':foto_banner', $foto_banner, PDO::PARAM_NULL);
 
         return $stmt->execute();
     }
@@ -73,5 +75,18 @@ class AkunModel {
         $stmt->bindParam(':nama', $nama);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function updateFoto($akun_id, $field, $path) {
+        $allowed = ['foto_profil', 'foto_banner'];
+        if (!in_array($field, $allowed, true)) {
+            return false;
+        }
+
+        $query = "UPDATE akun SET {$field} = :path WHERE akun_id = :akun_id";
+        $stmt = $this->db->conn()->prepare($query);
+        $stmt->bindParam(':path', $path);
+        $stmt->bindParam(':akun_id', $akun_id);
+        return $stmt->execute();
     }
 }
