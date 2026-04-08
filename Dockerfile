@@ -1,15 +1,9 @@
-FROM php:8.2-apache
+FROM php:8.2-cli
 
-COPY . /var/www/html/
+COPY . /app
 
-RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|g' \
-    /etc/apache2/sites-available/000-default.conf
+WORKDIR /app
 
-RUN echo '<Directory /var/www/html/public>\n\
-    AllowOverride All\n\
-    Require all granted\n\
-</Directory>' >> /etc/apache2/sites-available/000-default.conf
+EXPOSE 8080
 
-RUN a2enmod rewrite
-
-EXPOSE 80
+CMD ["php", "-S", "0.0.0.0:8080", "-t", "public"]
