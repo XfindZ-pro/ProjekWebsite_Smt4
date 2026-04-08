@@ -23,6 +23,8 @@ class Login extends Controller {
                     
                     // Jika benar, set Session Login
                     $_SESSION['user_nama'] = $user['nama'];
+                    $_SESSION['user_email'] = $user['email'];
+                    $_SESSION['user_akun_id'] = $user['akun_id'];
                     $_SESSION['user_foto'] = $user['foto_profil']; 
                     
                     // Langsung arahkan ke beranda tanpa pop-up alert

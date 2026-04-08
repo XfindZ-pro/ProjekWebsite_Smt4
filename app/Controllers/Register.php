@@ -33,8 +33,14 @@ class Register extends Controller {
             if ($akunModel->tambahAkun($_POST)) {
                 // Set Session Login
                 $_SESSION['user_nama'] = $nama;
+                $_SESSION['user_email'] = $email;
                 $_SESSION['user_foto'] = null;
                 
+                $createdUser = $akunModel->getAkunByEmail($email);
+                if ($createdUser) {
+                    $_SESSION['user_akun_id'] = $createdUser['akun_id'];
+                }
+
                 echo "<script>alert('Pendaftaran Berhasil! Selamat datang di Valora.'); window.location.href='".BASEURL."';</script>";
             } else {
                 echo "<script>alert('Sistem Error! Gagal mendaftar.'); window.location.href='".BASEURL."/register';</script>";

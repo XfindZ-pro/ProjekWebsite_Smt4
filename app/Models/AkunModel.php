@@ -60,4 +60,18 @@ class AkunModel {
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC); 
     }
+
+    public function getAkunById($akun_id) {
+        $stmt = $this->db->conn()->prepare("SELECT * FROM akun WHERE akun_id = :akun_id");
+        $stmt->bindParam(':akun_id', $akun_id);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getAkunByNama($nama) {
+        $stmt = $this->db->conn()->prepare("SELECT * FROM akun WHERE nama = :nama LIMIT 1");
+        $stmt->bindParam(':nama', $nama);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }
