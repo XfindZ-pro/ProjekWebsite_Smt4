@@ -9,8 +9,12 @@ class App {
         $url = $this->parseURL();
         
         if(isset($url[0])) {
-            if(file_exists(__DIR__ . '/../Controllers/' . $url[0] . '.php')) {
-                $this->controller = $url[0];
+            // FIX CASE SENSITIVE: Jadikan huruf pertama dari URL menjadi kapital
+            // Contoh: 'login' akan diubah menjadi 'Login'
+            $controllerName = ucfirst($url[0]);
+
+            if(file_exists(__DIR__ . '/../Controllers/' . $controllerName . '.php')) {
+                $this->controller = $controllerName;
                 unset($url[0]);
             } else {
                 $this->controller = 'NotFound';
