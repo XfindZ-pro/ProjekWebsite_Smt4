@@ -77,15 +77,19 @@ class AkunModel {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function updateFoto($akun_id, $field, $path) {
+    public function updateFoto($akun_id, $field, $value, $isBlob = false) {
         $allowed = ['foto_profil', 'foto_banner'];
         if (!in_array($field, $allowed, true)) {
             return false;
         }
 
-        $query = "UPDATE akun SET {$field} = :path WHERE akun_id = :akun_id";
+        $query = "UPDATE akun SET {$field} = :value WHERE akun_id = :akun_id";
         $stmt = $this->db->conn()->prepare($query);
-        $stmt->bindParam(':path', $path);
+        if ($isBlob) {
+            $stmt->bindValue(':value', $value, PDO::PARAM_LOB);
+        } else {
+            $stmt->bindValue(':value', $value);
+        }
         $stmt->bindParam(':akun_id', $akun_id);
         return $stmt->execute();
     }

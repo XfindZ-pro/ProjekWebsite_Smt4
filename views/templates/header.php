@@ -40,9 +40,17 @@
                     <?php if(isset($_SESSION['user_nama'])) : ?>
                         <?php
                             // FIX: Logika untuk menentukan URL foto di Header
-                            $headerAvatarUrl = !empty($_SESSION['user_foto']) 
-                                ? (preg_match('/^(https?:\/\/|\/)/', $_SESSION['user_foto']) ? htmlspecialchars($_SESSION['user_foto']) : BASEURL . '/' . htmlspecialchars($_SESSION['user_foto'])) 
-                                : "https://ui-avatars.com/api/?name=" . urlencode($_SESSION['user_nama']) . "&background=10b981&color=fff&size=512";
+                            if (!empty($_SESSION['user_foto'])) {
+                                if (preg_match('/^data:image\//', $_SESSION['user_foto'])) {
+                                    $headerAvatarUrl = $_SESSION['user_foto'];
+                                } elseif (preg_match('/^(https?:\/\/|\/)/', $_SESSION['user_foto'])) {
+                                    $headerAvatarUrl = htmlspecialchars($_SESSION['user_foto']);
+                                } else {
+                                    $headerAvatarUrl = BASEURL . '/' . htmlspecialchars($_SESSION['user_foto']);
+                                }
+                            } else {
+                                $headerAvatarUrl = "https://ui-avatars.com/api/?name=" . urlencode($_SESSION['user_nama']) . "&background=10b981&color=fff&size=512";
+                            }
                         ?>
                         <a href="<?= BASEURL; ?>/profile" class="flex items-center space-x-3 bg-slate-50 px-4 py-2 rounded-full border border-slate-200 hover:bg-slate-100 transition shadow-sm">
                             <span class="text-slate-700 font-bold text-sm tracking-wide"><?= htmlspecialchars($_SESSION['user_nama']); ?></span>

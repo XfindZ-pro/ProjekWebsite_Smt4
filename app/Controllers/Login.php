@@ -25,7 +25,15 @@ class Login extends Controller {
                     $_SESSION['user_nama'] = $user['nama'];
                     $_SESSION['user_email'] = $user['email'];
                     $_SESSION['user_akun_id'] = $user['akun_id'];
-                    $_SESSION['user_foto'] = $user['foto_profil']; 
+
+                    $avatarValue = $user['foto_profil'];
+                    if (!empty($avatarValue) && !preg_match('/^(https?:\/\/|\/|data:image\/)/', $avatarValue)) {
+                        $imageInfo = @getimagesizefromstring($avatarValue);
+                        if ($imageInfo) {
+                            $avatarValue = 'data:' . $imageInfo['mime'] . ';base64,' . base64_encode($avatarValue);
+                        }
+                    }
+                    $_SESSION['user_foto'] = $avatarValue;
                     
                     // Langsung arahkan ke beranda tanpa pop-up alert
                     header('Location: ' . BASEURL);

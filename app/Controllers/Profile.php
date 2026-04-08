@@ -65,35 +65,29 @@ class Profile extends Controller {
         }
 
         $extension = $allowedTypes[$imageInfo[2]];
-        $destinationFolder = $photoType === 'profil' ? 'uploads/avatars' : 'uploads/banners';
         $pathField = $photoType === 'profil' ? 'foto_profil' : 'foto_banner';
-
-        $uploadDir = __DIR__ . '/../../public/' . $destinationFolder;
-        if (!file_exists($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
-        }
-
         $akunId = $_SESSION['user_akun_id'];
-        $fileName = sprintf('%s_%s_%s.%s', $photoType, $akunId, time(), $extension);
-        $targetPath = $uploadDir . '/' . $fileName;
-        $targetUrl = BASEURL . '/' . $destinationFolder . '/' . $fileName;
 
-        if (!move_uploaded_file($_FILES['photo']['tmp_name'], $targetPath)) {
-            echo json_encode(['success' => false, 'message' => 'Gagal menyimpan file gambar.']);
+        $imageData = file_get_contents($_FILES['photo']['tmp_name']);
+        if ($imageData === false) {
+            echo json_encode(['success' => false, 'message' => 'Gagal membaca file gambar.']);
             exit;
         }
 
         $akunModel = $this->model('AkunModel');
-        if (!$akunModel->updateFoto($akunId, $pathField, $destinationFolder . '/' . $fileName)) {
+        if (!$akunModel->updateFoto($akunId, $pathField, $imageData, true)) {
             echo json_encode(['success' => false, 'message' => 'Gagal menyimpan data foto ke database.']);
             exit;
         }
 
         if ($photoType === 'profil') {
-            $_SESSION['user_foto'] = $destinationFolder . '/' . $fileName;
+            $imageInfo = @getimagesizefromstring($imageData);
+            if ($imageInfo) {
+                $_SESSION['user_foto'] = 'data:' . $imageInfo['mime'] . ';base64,' . base64_encode($imageData);
+            }
         }
 
-        echo json_encode(['success' => true, 'message' => 'Foto berhasil diperbarui.', 'url' => $targetUrl]);
+        echo json_encode(['success' => true, 'message' => 'Foto berhasil diperbarui.']);
         exit;
     }
 }

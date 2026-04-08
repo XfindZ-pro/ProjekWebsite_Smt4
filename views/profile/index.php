@@ -61,9 +61,35 @@
                 }
             }
 
-            // Fallback URL Gambar
-            $bannerUrl = !empty($user['foto_banner']) ? (preg_match('/^(https?:\/\/|\/)/', $user['foto_banner']) ? htmlspecialchars($user['foto_banner']) : BASEURL . '/' . htmlspecialchars($user['foto_banner'])) : 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1400&q=80';
-            $avatarUrl = !empty($user['foto_profil']) ? (preg_match('/^(https?:\/\/|\/)/', $user['foto_profil']) ? htmlspecialchars($user['foto_profil']) : BASEURL . '/' . htmlspecialchars($user['foto_profil'])) : "https://ui-avatars.com/api/?name=" . urlencode($user['nama']) . "&background=10b981&color=fff&size=512";
+            // Fallback URL Gambar untuk banner
+            if (!empty($user['foto_banner'])) {
+                if (preg_match('/^data:image\//', $user['foto_banner'])) {
+                    $bannerUrl = $user['foto_banner'];
+                } elseif (preg_match('/^(https?:\/\/|\/)/', $user['foto_banner'])) {
+                    $bannerUrl = htmlspecialchars($user['foto_banner']);
+                } elseif ($bannerInfo = @getimagesizefromstring($user['foto_banner'])) {
+                    $bannerUrl = 'data:' . $bannerInfo['mime'] . ';base64,' . base64_encode($user['foto_banner']);
+                } else {
+                    $bannerUrl = BASEURL . '/' . htmlspecialchars($user['foto_banner']);
+                }
+            } else {
+                $bannerUrl = 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1400&q=80';
+            }
+
+            // Fallback URL Gambar untuk avatar
+            if (!empty($user['foto_profil'])) {
+                if (preg_match('/^data:image\//', $user['foto_profil'])) {
+                    $avatarUrl = $user['foto_profil'];
+                } elseif (preg_match('/^(https?:\/\/|\/)/', $user['foto_profil'])) {
+                    $avatarUrl = htmlspecialchars($user['foto_profil']);
+                } elseif ($avatarInfo = @getimagesizefromstring($user['foto_profil'])) {
+                    $avatarUrl = 'data:' . $avatarInfo['mime'] . ';base64,' . base64_encode($user['foto_profil']);
+                } else {
+                    $avatarUrl = BASEURL . '/' . htmlspecialchars($user['foto_profil']);
+                }
+            } else {
+                $avatarUrl = "https://ui-avatars.com/api/?name=" . urlencode($user['nama']) . "&background=10b981&color=fff&size=512";
+            }
         ?>
 
         <section class="relative overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-sm">
