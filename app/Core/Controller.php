@@ -8,7 +8,7 @@ class Controller {
         $db = new Database();
         $data['db_status'] = $db->isConnected;
 
-        require_once __DIR__ . '../views/' . $view . '.php';
+        require_once '../views/' . $view . '.php';
     }
 
     // Fungsi untuk memanggil file Model
