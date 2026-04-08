@@ -1,5 +1,30 @@
-<main class="flex-1 bg-slate-50 py-10">
+<main class="flex-1 bg-slate-50 py-10 relative">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
+
+    <div id="profilePageLoader" class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-50/90 transition-opacity duration-500">
+        <div class="w-full max-w-4xl px-4 sm:px-6 lg:px-8">
+            <div class="rounded-[32px] border border-slate-200 bg-white shadow-sm p-6">
+                <div class="h-56 w-full rounded-3xl bg-slate-200 mb-8"></div>
+                <div class="mx-auto mb-6 h-44 w-44 rounded-full bg-slate-200 border-4 border-white shadow-xl"></div>
+                <div class="text-center space-y-3">
+                    <div class="mx-auto h-8 w-72 rounded-2xl bg-slate-200"></div>
+                    <div class="mx-auto h-4 w-48 rounded-2xl bg-slate-200"></div>
+                </div>
+                <div class="mt-10 grid gap-4 sm:grid-cols-2">
+                    <div class="h-28 rounded-3xl bg-slate-200"></div>
+                    <div class="h-28 rounded-3xl bg-slate-200"></div>
+                </div>
+                <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                    <div class="h-24 rounded-3xl bg-slate-200"></div>
+                    <div class="h-24 rounded-3xl bg-slate-200"></div>
+                </div>
+                <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                    <div class="h-24 rounded-3xl bg-slate-200"></div>
+                    <div class="h-24 rounded-3xl bg-slate-200"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="mb-8 text-center">
@@ -380,5 +405,14 @@
                 saveEditButton.textContent = 'Simpan';
             });
         }
+
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('profilePageLoader');
+            if (!loader) return;
+            loader.classList.add('opacity-0');
+            setTimeout(() => {
+                loader.remove();
+            }, 500);
+        });
     </script>
 </main>
