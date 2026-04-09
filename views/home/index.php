@@ -23,13 +23,13 @@
                     
                     <div class="mt-5 sm:mt-8 flex flex-col sm:flex-row sm:justify-center lg:justify-start gap-4" data-aos="fade-up" data-aos-delay="400">
                         <div class="rounded-lg shadow w-full sm:w-auto">
-                            <a href="#" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-emerald-600 hover:bg-emerald-700 md:py-4 md:text-lg transition transform hover:scale-105 shadow-md">
+                            <a href="<?= BASEURL; ?>/caribahanbaku" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-emerald-600 hover:bg-emerald-700 md:py-4 md:text-lg transition transform hover:scale-105 shadow-md">
                                 Cari Bahan Baku
                             </a>
                         </div>
                         <div class="w-full sm:w-auto">
-                            <a href="#" class="w-full flex items-center justify-center px-8 py-3 border-2 border-emerald-600 text-base font-medium rounded-lg text-emerald-700 bg-emerald-50 hover:bg-emerald-100 md:py-4 md:text-lg transition transform hover:scale-105">
-                                Jual Sisa Produksi
+                            <a href="<?= BASEURL; ?>/jualan" class="inline-flex items-center justify-center px-8 py-3 border-2 border-emerald-600 text-base font-medium rounded-full text-emerald-700 bg-emerald-50 hover:bg-emerald-100 md:py-4 md:text-lg transition transform hover:-translate-y-0.5 shadow-sm">
+                                Jual Limbah dan Barang Bekas
                             </a>
                         </div>
                     </div>
