@@ -7,6 +7,14 @@ class Jualan extends Controller {
             exit;
         }
 
+        $akunModel = $this->model('AkunModel');
+        $user = $akunModel->getAkunById($_SESSION['user_akun_id']);
+
+        if (!$user || $user['status_verifikasi'] !== 'disetujui') {
+            header('Location: ' . BASEURL . '/verifikasiakun');
+            exit;
+        }
+
         $data['aktif'] = 'jualan';
 
         $this->view('templates/header', $data);

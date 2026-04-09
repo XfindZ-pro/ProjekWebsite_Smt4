@@ -93,4 +93,45 @@ class AkunModel {
         $stmt->bindParam(':akun_id', $akun_id);
         return $stmt->execute();
     }
+
+    public function generateVerifikasiId() {
+        $stmt = $this->db->conn()->prepare("SELECT verifikasi_id FROM verifikasi_bisnis ORDER BY verifikasi_id DESC LIMIT 1");
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($row && preg_match('/^(verif)(\d+)$/', $row['verifikasi_id'], $matches)) {
+            $number = (int) $matches[2] + 1;
+        } else {
+            $number = 1;
+        }
+
+        return 'verif' . str_pad($number, 9, '0', STR_PAD_LEFT);
+    }
+
+    public function ajukanVerifikasi($data) {
+        $verifikasi_id = $this->generateVerifikasiId();
+
+        $query = "INSERT INTO verifikasi_bisnis (verifikasi_id, akun_id, jenis_entitas, nama_usaha, nik_penanggungjawab, file_ktp, nomor_izin_usaha, file_izin_usaha, alamat_usaha, nomor_telepon) VALUES (:verifikasi_id, :akun_id, :jenis_entitas, :nama_usaha, :nik_penanggungjawab, :file_ktp, :nomor_izin_usaha, :file_izin_usaha, :alamat_usaha, :nomor_telepon)";
+        $stmt = $this->db->conn()->prepare($query);
+        $stmt->bindParam(':verifikasi_id', $verifikasi_id);
+        $stmt->bindParam(':akun_id', $data['akun_id']);
+        $stmt->bindParam(':jenis_entitas', $data['jenis_entitas']);
+        $stmt->bindParam(':nama_usaha', $data['nama_usaha']);
+        $stmt->bindParam(':nik_penanggungjawab', $data['nik_penanggungjawab']);
+        $stmt->bindValue(':file_ktp', $data['file_ktp'], PDO::PARAM_LOB);
+        $stmt->bindParam(':nomor_izin_usaha', $data['nomor_izin_usaha']);
+        $stmt->bindValue(':file_izin_usaha', $data['file_izin_usaha'], PDO::PARAM_LOB);
+        $stmt->bindParam(':alamat_usaha', $data['alamat_usaha']);
+        $stmt->bindParam(':nomor_telepon', $data['nomor_telepon']);
+
+        return $stmt->execute();
+    }
+
+    public function updateStatusVerifikasi($akun_id, $status) {
+        $query = "UPDATE akun SET status_verifikasi = :status WHERE akun_id = :akun_id";
+        $stmt = $this->db->conn()->prepare($query);
+        $stmt->bindParam(':status', $status);
+        $stmt->bindParam(':akun_id', $akun_id);
+        return $stmt->execute();
+    }
 }
