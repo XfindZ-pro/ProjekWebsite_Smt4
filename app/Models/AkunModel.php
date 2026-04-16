@@ -134,4 +134,36 @@ class AkunModel {
         $stmt->bindParam(':akun_id', $akun_id);
         return $stmt->execute();
     }
+
+    public function setResetToken($akun_id, $token, $expiry) {
+        $query = "UPDATE akun SET reset_token = :token, reset_expiry = :expiry WHERE akun_id = :akun_id";
+        $stmt = $this->db->conn()->prepare($query);
+        $stmt->bindParam(':token', $token);
+        $stmt->bindParam(':expiry', $expiry);
+        $stmt->bindParam(':akun_id', $akun_id);
+        return $stmt->execute();
+    }
+
+    public function getUserByResetToken($token) {
+        $query = "SELECT * FROM akun WHERE reset_token = :token";
+        $stmt = $this->db->conn()->prepare($query);
+        $stmt->bindParam(':token', $token);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function updatePassword($akun_id, $password) {
+        $query = "UPDATE akun SET password = :password WHERE akun_id = :akun_id";
+        $stmt = $this->db->conn()->prepare($query);
+        $stmt->bindParam(':password', $password);
+        $stmt->bindParam(':akun_id', $akun_id);
+        return $stmt->execute();
+    }
+
+    public function clearResetToken($akun_id) {
+        $query = "UPDATE akun SET reset_token = NULL, reset_expiry = NULL WHERE akun_id = :akun_id";
+        $stmt = $this->db->conn()->prepare($query);
+        $stmt->bindParam(':akun_id', $akun_id);
+        return $stmt->execute();
+    }
 }

@@ -23,7 +23,7 @@
                 <div>
                     <div class="flex items-center justify-between">
                         <label for="password" class="block text-sm font-medium text-slate-700">Password</label>
-                        <a href="#" class="text-sm font-medium text-emerald-600 hover:text-emerald-500 transition">Lupa password?</a>
+                        <a href="<?= BASEURL; ?>/lupapassword" class="text-sm font-medium text-emerald-600 hover:text-emerald-500 transition">Lupa password?</a>
                     </div>
                     <div class="relative mt-1">
                         <input id="password" name="password" type="password" required class="appearance-none block w-full px-4 py-3 border border-slate-300 placeholder-slate-400 text-slate-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm transition shadow-sm pr-10" placeholder="••••••••">
