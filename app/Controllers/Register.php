@@ -34,6 +34,7 @@ class Register extends Controller {
                 // Set Session Login
                 $_SESSION['user_nama'] = $nama;
                 $_SESSION['user_email'] = $email;
+                $_SESSION['user_peran'] = 'pengguna';
                 $_SESSION['user_foto'] = null;
                 
                 $createdUser = $akunModel->getAkunByEmail($email);

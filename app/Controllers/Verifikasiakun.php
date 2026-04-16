@@ -52,12 +52,10 @@ class Verifikasiakun extends Controller {
 
         $jenis_entitas = $_POST['jenis_entitas'] ?? '';
         $nama_usaha = trim($_POST['nama_usaha'] ?? '');
-        $nik_penanggungjawab = trim($_POST['nik_penanggungjawab'] ?? '');
-        $nomor_izin_usaha = trim($_POST['nomor_izin_usaha'] ?? '');
         $alamat_usaha = trim($_POST['alamat_usaha'] ?? '');
         $nomor_telepon = trim($_POST['nomor_telepon'] ?? '');
 
-        if (empty($jenis_entitas) || empty($nama_usaha) || empty($nik_penanggungjawab) || empty($nomor_izin_usaha) || empty($alamat_usaha) || empty($nomor_telepon)) {
+        if (empty($jenis_entitas) || empty($nama_usaha) || empty($alamat_usaha) || empty($nomor_telepon)) {
             header('Location: ' . BASEURL . '/verifikasiakun?message=' . rawurlencode('Semua kolom wajib diisi.') . '&type=error');
             exit;
         }
@@ -93,9 +91,7 @@ class Verifikasiakun extends Controller {
             'akun_id' => $_SESSION['user_akun_id'],
             'jenis_entitas' => $jenis_entitas,
             'nama_usaha' => $nama_usaha,
-            'nik_penanggungjawab' => $nik_penanggungjawab,
             'file_ktp' => $file_ktp,
-            'nomor_izin_usaha' => $nomor_izin_usaha,
             'file_izin_usaha' => $file_izin_usaha,
             'alamat_usaha' => $alamat_usaha,
             'nomor_telepon' => $nomor_telepon,

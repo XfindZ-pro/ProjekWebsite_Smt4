@@ -77,19 +77,8 @@
 
                     <div class="grid gap-4 sm:grid-cols-2">
                         <div>
-                            <label for="nik_penanggungjawab" class="block text-sm font-medium text-slate-700">NIK Penanggung Jawab</label>
-                            <input id="nik_penanggungjawab" name="nik_penanggungjawab" type="text" placeholder="Contoh: 1234567890123456" class="mt-2 block w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-4 text-slate-900 focus:border-emerald-500 focus:ring-emerald-500/20 outline-none" />
-                        </div>
-                        <div>
                             <label for="nomor_telepon" class="block text-sm font-medium text-slate-700">Nomor Telepon</label>
                             <input id="nomor_telepon" name="nomor_telepon" type="text" placeholder="Contoh: 081234567890" class="mt-2 block w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-4 text-slate-900 focus:border-emerald-500 focus:ring-emerald-500/20 outline-none" />
-                        </div>
-                    </div>
-
-                    <div class="grid gap-4 sm:grid-cols-2">
-                        <div>
-                            <label for="nomor_izin_usaha" class="block text-sm font-medium text-slate-700">Nomor Izin Usaha</label>
-                            <input id="nomor_izin_usaha" name="nomor_izin_usaha" type="text" placeholder="Contoh: SIUP-1234" class="mt-2 block w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-4 text-slate-900 focus:border-emerald-500 focus:ring-emerald-500/20 outline-none" />
                         </div>
                         <div>
                             <label for="alamat_usaha" class="block text-sm font-medium text-slate-700">Alamat Usaha</label>

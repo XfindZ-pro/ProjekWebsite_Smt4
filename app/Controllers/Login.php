@@ -25,6 +25,7 @@ class Login extends Controller {
                     $_SESSION['user_nama'] = $user['nama'];
                     $_SESSION['user_email'] = $user['email'];
                     $_SESSION['user_akun_id'] = $user['akun_id'];
+                    $_SESSION['user_peran'] = trim(strtolower($user['peran'] ?? 'pengguna'));
 
                     $avatarValue = $user['foto_profil'];
                     if (!empty($avatarValue) && !preg_match('/^(https?:\/\/|\/|data:image\/)/', $avatarValue)) {

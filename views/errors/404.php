@@ -15,7 +15,7 @@
         <div class="bg-blue-500 px-2 text-sm rounded rotate-12 absolute text-white shadow-lg">
             Page Not Found
         </div>
-        
+            
         <h2 class="mt-8 text-3xl font-semibold text-slate-700">Waduh, Kamu Tersesat!</h2>
         <p class="mt-4 text-slate-500 max-w-md mx-auto">
             Halaman atau URL yang kamu cari sepertinya tidak ada atau sudah dipindahkan.

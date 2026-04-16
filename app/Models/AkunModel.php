@@ -111,15 +111,13 @@ class AkunModel {
     public function ajukanVerifikasi($data) {
         $verifikasi_id = $this->generateVerifikasiId();
 
-        $query = "INSERT INTO verifikasi_bisnis (verifikasi_id, akun_id, jenis_entitas, nama_usaha, nik_penanggungjawab, file_ktp, nomor_izin_usaha, file_izin_usaha, alamat_usaha, nomor_telepon) VALUES (:verifikasi_id, :akun_id, :jenis_entitas, :nama_usaha, :nik_penanggungjawab, :file_ktp, :nomor_izin_usaha, :file_izin_usaha, :alamat_usaha, :nomor_telepon)";
+        $query = "INSERT INTO verifikasi_bisnis (verifikasi_id, akun_id, jenis_entitas, nama_usaha, file_ktp, file_izin_usaha, alamat_usaha, nomor_telepon) VALUES (:verifikasi_id, :akun_id, :jenis_entitas, :nama_usaha, :file_ktp, :file_izin_usaha, :alamat_usaha, :nomor_telepon)";
         $stmt = $this->db->conn()->prepare($query);
         $stmt->bindParam(':verifikasi_id', $verifikasi_id);
         $stmt->bindParam(':akun_id', $data['akun_id']);
         $stmt->bindParam(':jenis_entitas', $data['jenis_entitas']);
         $stmt->bindParam(':nama_usaha', $data['nama_usaha']);
-        $stmt->bindParam(':nik_penanggungjawab', $data['nik_penanggungjawab']);
         $stmt->bindValue(':file_ktp', $data['file_ktp'], PDO::PARAM_LOB);
-        $stmt->bindParam(':nomor_izin_usaha', $data['nomor_izin_usaha']);
         $stmt->bindValue(':file_izin_usaha', $data['file_izin_usaha'], PDO::PARAM_LOB);
         $stmt->bindParam(':alamat_usaha', $data['alamat_usaha']);
         $stmt->bindParam(':nomor_telepon', $data['nomor_telepon']);
@@ -198,4 +196,146 @@ class AkunModel {
         $stmt->bindParam(':otp_id', $otp_id);
         return $stmt->execute();
     }
+
+ // ==========================================
+    // FUNGSI STATISTIK UNTUK DASHBOARD ADMIN
+    // ==========================================
+
+    // 1. Menghitung total semua pengguna (Semua role)
+    public function countUsers() {
+        try {
+            $stmt = $this->db->conn()->prepare("SELECT COUNT(*) AS total FROM akun");
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result['total'] ?? 0;
+        } catch (Exception $e) {
+            return 0;
+        }
+    }
+
+    // 3. Menghitung total produk aktif di tabel katalog
+    public function countActiveProducts() {
+        try {
+            $stmt = $this->db->conn()->prepare("SELECT COUNT(*) AS total FROM katalog");
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result['total'] ?? 0;
+        } catch (Exception $e) {
+            // Jika tabel katalog belum dibuat di database, akan mengembalikan 0 tanpa membuat halaman error
+            return 0; 
+        }
+    }
+
+    // 4. Menghitung verifikasi yang disetujui pada hari ini
+    public function countApprovedToday() {
+        try {
+            // Memanfaatkan fungsi CURDATE() dari MySQL untuk mengecek update hari ini
+            $stmt = $this->db->conn()->prepare("SELECT COUNT(*) AS total FROM akun WHERE status_verifikasi = 'disetujui' AND DATE(updated_at) = CURDATE()");
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result['total'] ?? 0;
+        } catch (Exception $e) {
+            return 0;
+        }
+    }
+
+    public function countPendingVerifications() {
+        try {
+            $stmt = $this->db->conn()->prepare("SELECT COUNT(*) AS total FROM akun WHERE status_verifikasi = 'menunggu'");
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result['total'] ?? 0;
+        } catch (Exception $e) {
+            return 0;
+        }
+    }
+
+    public function countAllVerifications() {
+        try {
+            $stmt = $this->db->conn()->prepare("SELECT COUNT(*) AS total FROM verifikasi_bisnis");
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result['total'] ?? 0;
+        } catch (Exception $e) {
+            return 0;
+        }
+    }
+
+    public function getRecentVerifications($limit = 3) {
+        try {
+            $query = "SELECT v.nama_usaha, a.nama AS penjual, v.jenis_entitas FROM verifikasi_bisnis v JOIN akun a ON v.akun_id = a.akun_id ORDER BY v.verifikasi_id DESC LIMIT :limit";
+            $stmt = $this->db->conn()->prepare($query);
+            $stmt->bindValue(':limit', (int) $limit, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+
+    // Ambil semua daftar pengajuan verifikasi yang masuk
+    public function getPendingVerifications() {
+        try {
+            $query = "SELECT v.*, a.nama as nama_user, a.email 
+                      FROM verifikasi_bisnis v 
+                      JOIN akun a ON v.akun_id = a.akun_id 
+                      ORDER BY v.tanggal_pengajuan DESC";
+            
+            $stmt = $this->db->conn()->prepare($query);
+            $stmt->execute();
+            
+            // Gunakan fetchAll(PDO::FETCH_ASSOC) untuk mengambil banyak baris data
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+
+    // Logika Persetujuan (Hapus data verifikasi & Update status akun)
+    public function approveVerification($verifikasi_id, $akun_id) {
+        try {
+            // 1. Update status di tabel akun
+            $query1 = "UPDATE akun SET status_verifikasi = 'disetujui' WHERE akun_id = :akun_id";
+            $stmt1 = $this->db->conn()->prepare($query1);
+            $stmt1->bindParam(':akun_id', $akun_id);
+            $stmt1->execute();
+
+            // 2. Hapus data dari tabel verifikasi_bisnis (agar memori LONGBLOB tidak bengkak)
+            $query2 = "DELETE FROM verifikasi_bisnis WHERE verifikasi_id = :v_id";
+            $stmt2 = $this->db->conn()->prepare($query2);
+            $stmt2->bindParam(':v_id', $verifikasi_id);
+            $stmt2->execute();
+
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    // Logika Penolakan (Hapus data verifikasi & Set status ditolak)
+    public function rejectVerification($verifikasi_id, $akun_id) {
+        try {
+            // 1. Set status ditolak di tabel akun
+            $query1 = "UPDATE akun SET status_verifikasi = 'ditolak' WHERE akun_id = :akun_id";
+            $stmt1 = $this->db->conn()->prepare($query1);
+            $stmt1->bindParam(':akun_id', $akun_id);
+            $stmt1->execute();
+
+            // 2. Hapus data pengajuan
+            $query2 = "DELETE FROM verifikasi_bisnis WHERE verifikasi_id = :v_id";
+            $stmt2 = $this->db->conn()->prepare($query2);
+            $stmt2->bindParam(':v_id', $verifikasi_id);
+            $stmt2->execute();
+
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+   
+
+ 
+
+
 }

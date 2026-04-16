@@ -30,10 +30,14 @@
                     </a>
                 </div>
                 
+                <?php $isAdmin = isset($_SESSION['user_peran']) && trim(strtolower($_SESSION['user_peran'])) === 'admin'; ?>
                 <div class="hidden md:flex space-x-8">
                     <a href="<?= BASEURL; ?>" class="<?= ($data['aktif'] == 'beranda') ? 'text-emerald-600 font-bold border-b-2 border-emerald-600 pb-1' : 'text-slate-600 hover:text-emerald-600 font-medium transition pb-1' ?>">Beranda</a>
                     <a href="<?= BASEURL; ?>/katalog" class="<?= ($data['aktif'] == 'katalog') ? 'text-emerald-600 font-bold border-b-2 border-emerald-600 pb-1' : 'text-slate-600 hover:text-emerald-600 font-medium transition pb-1' ?>">Katalog</a>
                     <a href="<?= BASEURL; ?>/tentang" class="<?= ($data['aktif'] == 'tentang') ? 'text-emerald-600 font-bold border-b-2 border-emerald-600 pb-1' : 'text-slate-600 hover:text-emerald-600 font-medium transition pb-1' ?>">Tentang Kami</a>
+                    <?php if ($isAdmin) : ?>
+                        <a href="<?= BASEURL; ?>/dashboardadmin" class="<?= ($data['aktif'] == 'dashboardadmin') ? 'text-emerald-600 font-bold border-b-2 border-emerald-600 pb-1' : 'text-slate-600 hover:text-emerald-600 font-medium transition pb-1' ?>">Admin</a>
+                    <?php endif; ?>
                 </div>
                 
                 <div class="hidden md:flex items-center space-x-4">
@@ -83,6 +87,9 @@
                 
                 <div class="border-t border-slate-100 pt-4 flex flex-col space-y-3">
                     <?php if(isset($_SESSION['user_nama'])) : ?>
+                        <?php if (isset($_SESSION['user_peran']) && $_SESSION['user_peran'] === 'admin') : ?>
+                            <a href="<?= BASEURL; ?>/dashboardadmin" class="block text-center text-emerald-600 font-medium py-2 hover:bg-emerald-50 rounded-lg border border-emerald-600">Admin Dashboard</a>
+                        <?php endif; ?>
                         <a href="<?= BASEURL; ?>/profile" class="block text-center text-slate-700 font-medium py-2 hover:bg-slate-50 rounded-lg border border-slate-300">Profil Saya</a>
                         <a href="<?= BASEURL; ?>/logout" class="block text-center text-red-600 font-medium py-2 hover:bg-red-50 rounded-lg border border-red-200">Keluar</a>
                     <?php else : ?>
