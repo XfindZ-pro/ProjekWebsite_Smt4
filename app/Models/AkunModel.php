@@ -471,6 +471,84 @@ class AkunModel
         }
     }
 
+// Menarik satu produk berdasarkan ID-nya
+    public function getProdukById($id) {
+        try {
+            $stmt = $this->db->conn()->prepare("SELECT * FROM katalog WHERE produk_id = :id");
+            $stmt->bindParam(':id', $id);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            return null;
+        }
+    }
+
+    // Memperbarui data produk yang sudah ada
+    public function updateProduk($data) {
+        try {
+            // Query dinamis untuk menangani apakah foto diperbarui atau tidak
+            $query = "UPDATE katalog SET 
+                        nama_produk = :nama_produk, 
+                        kategori_limbah = :kategori_limbah, 
+                        berat_tersedia = :berat_tersedia, 
+                        harga_per_kg = :harga_per_kg, 
+                        min_order = :min_order, 
+                        lokasi_pickup = :lokasi_pickup, 
+                        kondisi_harga = :kondisi_harga, 
+                        deskripsi = :deskripsi, 
+                        kondisi_fisik = :kondisi_fisik, 
+                        metode_pengemasan = :metode_pengemasan,
+                        status_produk = :status_produk";
+            
+            // Tambahkan kolom foto ke query hanya jika ada file baru diunggah
+            if ($data['foto_1'] !== null) $query .= ", foto_1 = :foto_1";
+            if ($data['foto_2'] !== null) $query .= ", foto_2 = :foto_2";
+            if ($data['foto_3'] !== null) $query .= ", foto_3 = :foto_3";
+            if ($data['dokumen_pendukung'] !== null) $query .= ", dokumen_pendukung = :dokumen_pendukung";
+
+            $query .= " WHERE produk_id = :produk_id AND penjual_id = :penjual_id";
+
+            $stmt = $this->db->conn()->prepare($query);
+            
+            // Bind parameter dasar
+            $stmt->bindParam(':produk_id', $data['produk_id']);
+            $stmt->bindParam(':penjual_id', $data['penjual_id']);
+            $stmt->bindParam(':nama_produk', $data['nama_produk']);
+            $stmt->bindParam(':kategori_limbah', $data['kategori_limbah']);
+            $stmt->bindParam(':berat_tersedia', $data['berat_tersedia']);
+            $stmt->bindParam(':harga_per_kg', $data['harga_per_kg']);
+            $stmt->bindParam(':min_order', $data['min_order']);
+            $stmt->bindParam(':lokasi_pickup', $data['lokasi_pickup']);
+            $stmt->bindParam(':kondisi_harga', $data['kondisi_harga']);
+            $stmt->bindParam(':deskripsi', $data['deskripsi']);
+            $stmt->bindParam(':kondisi_fisik', $data['kondisi_fisik']);
+            $stmt->bindParam(':metode_pengemasan', $data['metode_pengemasan']);
+            $stmt->bindParam(':status_produk', $data['status_produk']);
+
+            // Bind foto hanya jika ada data baru
+            if ($data['foto_1'] !== null) $stmt->bindValue(':foto_1', $data['foto_1'], PDO::PARAM_LOB);
+            if ($data['foto_2'] !== null) $stmt->bindValue(':foto_2', $data['foto_2'], PDO::PARAM_LOB);
+            if ($data['foto_3'] !== null) $stmt->bindValue(':foto_3', $data['foto_3'], PDO::PARAM_LOB);
+            if ($data['dokumen_pendukung'] !== null) $stmt->bindValue(':dokumen_pendukung', $data['dokumen_pendukung'], PDO::PARAM_LOB);
+
+            return $stmt->execute();
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    // Menghapus produk dari katalog
+    public function hapusProduk($produk_id, $penjual_id) {
+        try {
+            $stmt = $this->db->conn()->prepare("DELETE FROM katalog WHERE produk_id = :p_id AND penjual_id = :u_id");
+            $stmt->bindParam(':p_id', $produk_id);
+            $stmt->bindParam(':u_id', $penjual_id);
+            return $stmt->execute();
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
     // Menarik data katalog dengan fitur Filter, Search, dan Sorting
     public function getKatalogFilter($filter = [])
     {
