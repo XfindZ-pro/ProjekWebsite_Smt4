@@ -11,9 +11,12 @@ class Dashboardadmin extends Controller {
         $akunModel = $this->model('AkunModel');
         $data['aktif'] = 'dashboardadmin';
         
-        // Menarik data tabel pengajuan verifikasi
+        // Menarik data antrean verifikasi
         $data['verifikasi_list'] = $akunModel->getPendingVerifications();
         $data['recent_submissions'] = $akunModel->getRecentVerifications(3);
+        
+        // Menarik data SEMUA pengguna
+        $data['users_list'] = $akunModel->getAllUsers();
         
         // Memuat statistik dinamis untuk 4 kotak dashboard
         $data['total_users'] = $akunModel->countUsers();

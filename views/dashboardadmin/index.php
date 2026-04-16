@@ -186,15 +186,14 @@
             </div>
         </div>
 
-        <div id="tab-pengguna" class="tab-content hidden animate-fade-in">
+       <div id="tab-pengguna" class="tab-content hidden animate-fade-in">
             <div class="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
                 <div class="p-6 border-b border-slate-100 flex justify-between items-center">
-                    <h2 class="text-xl font-bold text-slate-900">Data Pengguna Valora</h2>
-                    <input type="text" placeholder="Cari email atau nama..."
-                        class="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 w-64" />
+                    <h2 class="text-xl font-bold text-slate-900">Data Pengguna Valora (<?= count($data['users_list'] ?? []); ?>)</h2>
+                    <input type="text" id="searchUserInput" onkeyup="searchUsersTable()" placeholder="Cari email atau nama..." class="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 w-64" />
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm text-slate-600">
+                    <table class="w-full text-left text-sm text-slate-600" id="usersTable">
                         <thead class="bg-slate-50 text-slate-500 uppercase">
                             <tr>
                                 <th class="px-6 py-4 font-semibold">User ID / Nama</th>
@@ -204,22 +203,52 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
-                            <tr class="hover:bg-slate-50 transition">
-                                <td class="px-6 py-4">
-                                    <div class="font-bold text-slate-900">Zulfa Afifah</div>
-                                    <div class="text-xs text-slate-500">akun000001</div>
-                                </td>
-                                <td class="px-6 py-4">zulfa@email.com</td>
-                                <td class="px-6 py-4 uppercase text-xs font-bold text-slate-900">Pengguna</td>
-                                <td class="px-6 py-4"><span
-                                        class="rounded-full bg-emerald-50 text-emerald-700 px-3 py-1 text-xs font-semibold">Disetujui</span>
-                                </td>
-                            </tr>
+                            <?php if (!empty($data['users_list'])) : ?>
+                                <?php foreach ($data['users_list'] as $u) : ?>
+                                    <tr class="hover:bg-slate-50 transition user-row">
+                                        <td class="px-6 py-4">
+                                            <div class="font-bold text-slate-900 search-name"><?= htmlspecialchars($u['nama']); ?></div>
+                                            <div class="text-xs text-slate-500"><?= htmlspecialchars($u['akun_id']); ?></div>
+                                        </td>
+                                        <td class="px-6 py-4 search-email"><?= htmlspecialchars($u['email']); ?></td>
+                                        <td class="px-6 py-4 uppercase text-xs font-bold text-slate-900"><?= htmlspecialchars($u['peran']); ?></td>
+                                        <td class="px-6 py-4">
+                                            <?php
+                                                // Pewarnaan Badge Status Verifikasi
+                                                $statusClass = 'bg-slate-100 text-slate-700';
+                                                $statusLabel = 'Tidak Diketahui';
+                                                switch ($u['status_verifikasi']) {
+                                                    case 'disetujui':
+                                                        $statusClass = 'bg-emerald-50 text-emerald-700';
+                                                        $statusLabel = 'Disetujui';
+                                                        break;
+                                                    case 'menunggu':
+                                                        $statusClass = 'bg-blue-50 text-blue-700';
+                                                        $statusLabel = 'Menunggu';
+                                                        break;
+                                                    case 'ditolak':
+                                                        $statusClass = 'bg-red-50 text-red-700';
+                                                        $statusLabel = 'Ditolak';
+                                                        break;
+                                                    case 'tanpa_verifikasi':
+                                                        $statusClass = 'bg-yellow-50 text-yellow-700';
+                                                        $statusLabel = 'Tanpa Verifikasi';
+                                                        break;
+                                                }
+                                            ?>
+                                            <span class="rounded-full px-3 py-1 text-xs font-semibold <?= $statusClass; ?>"><?= $statusLabel; ?></span>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else : ?>
+                                <tr>
+                                    <td colspan="4" class="p-10 text-center text-slate-400 font-medium">Belum ada pengguna terdaftar.</td>
+                                </tr>
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
             </div>
-        </div>
 
         <div id="tab-produk" class="tab-content hidden animate-fade-in">
             <div class="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
@@ -310,5 +339,21 @@
                 });
             });
         });
+        function searchUsersTable() {
+                    let input = document.getElementById("searchUserInput").value.toUpperCase();
+                    let rows = document.querySelectorAll("#usersTable .user-row");
+
+                    rows.forEach(row => {
+                        let name = row.querySelector(".search-name").textContent.toUpperCase();
+                        let email = row.querySelector(".search-email").textContent.toUpperCase();
+                        
+                        // Jika nama atau email cocok dengan ketikan, tampilkan barisnya
+                        if (name.indexOf(input) > -1 || email.indexOf(input) > -1) {
+                            row.style.display = "";
+                        } else {
+                            row.style.display = "none";
+                        }
+                    });
+                }
     </script>
 </main>
