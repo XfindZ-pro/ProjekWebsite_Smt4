@@ -208,9 +208,61 @@ class AkunModel {
         }
     }
 
- // ==========================================
-    // FUNGSI STATISTIK UNTUK DASHBOARD ADMIN
-    // ==========================================
+ // Menghasilkan ID Produk otomatis (Contoh: PRD000001)
+    public function generateProdukId() {
+        $stmt = $this->db->conn()->prepare("SELECT produk_id FROM katalog ORDER BY produk_id DESC LIMIT 1");
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($row && preg_match('/^(PRD)(\d+)$/', $row['produk_id'], $matches)) {
+            $number = (int) $matches[2] + 1;
+        } else {
+            $number = 1;
+        }
+
+        return 'PRD' . str_pad($number, 6, "0", STR_PAD_LEFT);
+    }
+
+    // Menyimpan produk baru ke database
+    public function tambahProduk($data) {
+        $produk_id = $this->generateProdukId();
+        
+        $query = "INSERT INTO katalog (
+                    produk_id, penjual_id, nama_produk, kategori_limbah, berat_tersedia, 
+                    harga_per_kg, min_order, lokasi_pickup, kondisi_harga, deskripsi, 
+                    kondisi_fisik, metode_pengemasan, foto_1, foto_2, foto_3, 
+                    dokumen_pendukung, status_produk
+                  ) VALUES (
+                    :produk_id, :penjual_id, :nama_produk, :kategori_limbah, :berat_tersedia, 
+                    :harga_per_kg, :min_order, :lokasi_pickup, :kondisi_harga, :deskripsi, 
+                    :kondisi_fisik, :metode_pengemasan, :foto_1, :foto_2, :foto_3, 
+                    :dokumen_pendukung, :status_produk
+                  )";
+        
+        $stmt = $this->db->conn()->prepare($query);
+        $stmt->bindParam(':produk_id', $produk_id);
+        $stmt->bindParam(':penjual_id', $data['penjual_id']);
+        $stmt->bindParam(':nama_produk', $data['nama_produk']);
+        $stmt->bindParam(':kategori_limbah', $data['kategori_limbah']);
+        $stmt->bindParam(':berat_tersedia', $data['berat_tersedia']);
+        $stmt->bindParam(':harga_per_kg', $data['harga_per_kg']);
+        $stmt->bindParam(':min_order', $data['min_order']);
+        $stmt->bindParam(':lokasi_pickup', $data['lokasi_pickup']);
+        $stmt->bindParam(':kondisi_harga', $data['kondisi_harga']);
+        $stmt->bindParam(':deskripsi', $data['deskripsi']);
+        $stmt->bindParam(':kondisi_fisik', $data['kondisi_fisik']);
+        $stmt->bindParam(':metode_pengemasan', $data['metode_pengemasan']);
+        
+        // Bind Gambar sebagai LOB (Large Object)
+        $stmt->bindValue(':foto_1', $data['foto_1'], PDO::PARAM_LOB);
+        $stmt->bindValue(':foto_2', $data['foto_2'], PDO::PARAM_LOB);
+        $stmt->bindValue(':foto_3', $data['foto_3'], PDO::PARAM_LOB);
+        $stmt->bindValue(':dokumen_pendukung', $data['dokumen_pendukung'], PDO::PARAM_LOB);
+        
+        $stmt->bindParam(':status_produk', $data['status_produk']);
+
+        return $stmt->execute();
+    }
 
     // 1. Menghitung total semua pengguna (Semua role)
     public function countUsers() {

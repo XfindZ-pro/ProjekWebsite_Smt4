@@ -186,14 +186,24 @@
             </div>
         </div>
 
-       <div id="tab-pengguna" class="tab-content hidden animate-fade-in">
+  <div id="tab-pengguna" class="tab-content hidden animate-fade-in">
             <div class="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-                <div class="p-6 border-b border-slate-100 flex justify-between items-center">
-                    <h2 class="text-xl font-bold text-slate-900">Data Pengguna Valora (<?= count($data['users_list'] ?? []); ?>)</h2>
-                    <input type="text" id="searchUserInput" onkeyup="searchUsersTable()" placeholder="Cari email atau nama..." class="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 w-64" />
+                <div class="p-6 border-b border-slate-100 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Data Pengguna Valora</h2>
+                        <p class="text-xs text-slate-500 mt-1">Total: <span id="totalUserCount"><?= count($data['users_list'] ?? []); ?></span> pengguna terdaftar.</p>
+                    </div>
+                    <div class="relative w-full md:w-80">
+                        <input type="text" id="userSearchInput" placeholder="Cari nama atau email..." 
+                               class="w-full rounded-full border border-slate-200 bg-slate-50 pl-10 pr-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 shadow-sm" />
+                        <div class="absolute left-3.5 top-3 text-slate-400">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        </div>
+                    </div>
                 </div>
+
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm text-slate-600" id="usersTable">
+                    <table class="w-full text-left text-sm text-slate-600">
                         <thead class="bg-slate-50 text-slate-500 uppercase">
                             <tr>
                                 <th class="px-6 py-4 font-semibold">User ID / Nama</th>
@@ -202,53 +212,135 @@
                                 <th class="px-6 py-4 font-semibold">Status Verifikasi</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100">
-                            <?php if (!empty($data['users_list'])) : ?>
-                                <?php foreach ($data['users_list'] as $u) : ?>
-                                    <tr class="hover:bg-slate-50 transition user-row">
-                                        <td class="px-6 py-4">
-                                            <div class="font-bold text-slate-900 search-name"><?= htmlspecialchars($u['nama']); ?></div>
-                                            <div class="text-xs text-slate-500"><?= htmlspecialchars($u['akun_id']); ?></div>
-                                        </td>
-                                        <td class="px-6 py-4 search-email"><?= htmlspecialchars($u['email']); ?></td>
-                                        <td class="px-6 py-4 uppercase text-xs font-bold text-slate-900"><?= htmlspecialchars($u['peran']); ?></td>
-                                        <td class="px-6 py-4">
-                                            <?php
-                                                // Pewarnaan Badge Status Verifikasi
-                                                $statusClass = 'bg-slate-100 text-slate-700';
-                                                $statusLabel = 'Tidak Diketahui';
-                                                switch ($u['status_verifikasi']) {
-                                                    case 'disetujui':
-                                                        $statusClass = 'bg-emerald-50 text-emerald-700';
-                                                        $statusLabel = 'Disetujui';
-                                                        break;
-                                                    case 'menunggu':
-                                                        $statusClass = 'bg-blue-50 text-blue-700';
-                                                        $statusLabel = 'Menunggu';
-                                                        break;
-                                                    case 'ditolak':
-                                                        $statusClass = 'bg-red-50 text-red-700';
-                                                        $statusLabel = 'Ditolak';
-                                                        break;
-                                                    case 'tanpa_verifikasi':
-                                                        $statusClass = 'bg-yellow-50 text-yellow-700';
-                                                        $statusLabel = 'Tanpa Verifikasi';
-                                                        break;
-                                                }
-                                            ?>
-                                            <span class="rounded-full px-3 py-1 text-xs font-semibold <?= $statusClass; ?>"><?= $statusLabel; ?></span>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php else : ?>
-                                <tr>
-                                    <td colspan="4" class="p-10 text-center text-slate-400 font-medium">Belum ada pengguna terdaftar.</td>
-                                </tr>
-                            <?php endif; ?>
-                        </tbody>
+                        <tbody id="userTableBody" class="divide-y divide-slate-100">
+                            </tbody>
                     </table>
                 </div>
+
+                <div class="p-6 border-t border-slate-100 bg-slate-50/50 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <p class="text-sm text-slate-500" id="paginationInfo">
+                        Menampilkan 0 sampai 0 dari 0 data
+                    </p>
+                    <div class="flex items-center gap-2" id="paginationButtons">
+                        </div>
+                </div>
             </div>
+
+            <script>
+                // Data asli dari PHP
+                const allUsers = <?= json_encode($data['users_list'] ?? []); ?>;
+                let filteredUsers = [...allUsers];
+                let currentPage = 1;
+                const rowsPerPage = 10;
+
+                const searchInput = document.getElementById('userSearchInput');
+                const tableBody = document.getElementById('userTableBody');
+                const paginationInfo = document.getElementById('paginationInfo');
+                const paginationButtons = document.getElementById('paginationButtons');
+
+                function renderTable() {
+                    const start = (currentPage - 1) * rowsPerPage;
+                    const end = start + rowsPerPage;
+                    const paginatedItems = filteredUsers.slice(start, end);
+
+                    tableBody.innerHTML = '';
+
+                    if (paginatedItems.length === 0) {
+                        tableBody.innerHTML = `<tr><td colspan="4" class="p-12 text-center text-slate-400 font-medium">Data tidak ditemukan.</td></tr>`;
+                        updatePagination();
+                        return;
+                    }
+
+                    paginatedItems.forEach(u => {
+                        // Logika Badge Status
+                        let statusClass = 'bg-slate-100 text-slate-700';
+                        let statusLabel = 'Tanpa Verifikasi';
+                        
+                        if(u.status_verifikasi === 'disetujui') {
+                            statusClass = 'bg-emerald-50 text-emerald-700';
+                            statusLabel = 'Disetujui';
+                        } else if(u.status_verifikasi === 'menunggu') {
+                            statusClass = 'bg-blue-50 text-blue-700';
+                            statusLabel = 'Menunggu';
+                        } else if(u.status_verifikasi === 'ditolak') {
+                            statusClass = 'bg-red-50 text-red-700';
+                            statusLabel = 'Ditolak';
+                        }
+
+                        const row = `
+                            <tr class="hover:bg-white transition group">
+                                <td class="px-6 py-4">
+                                    <div class="font-bold text-slate-900 group-hover:text-emerald-600 transition">${u.nama}</div>
+                                    <div class="text-xs text-slate-400 font-mono">${u.akun_id}</div>
+                                </td>
+                                <td class="px-6 py-4 font-medium">${u.email}</td>
+                                <td class="px-6 py-4 uppercase text-[10px] font-black tracking-widest text-slate-400">
+                                    <span class="border border-slate-200 px-2 py-0.5 rounded">${u.peran}</span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="rounded-full px-3 py-1 text-xs font-bold ${statusClass}">${statusLabel}</span>
+                                </td>
+                            </tr>
+                        `;
+                        tableBody.innerHTML += row;
+                    });
+
+                    updatePagination();
+                }
+
+                function updatePagination() {
+                    const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
+                    const startIdx = filteredUsers.length === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1;
+                    const endIdx = Math.min(currentPage * rowsPerPage, filteredUsers.length);
+
+                    paginationInfo.innerText = `Menampilkan ${startIdx} sampai ${endIdx} dari ${filteredUsers.length} data`;
+
+                    paginationButtons.innerHTML = '';
+
+                    // Tombol Previous
+                    const prevBtn = document.createElement('button');
+                    prevBtn.innerText = 'Sebelumnya';
+                    prevBtn.className = `px-4 py-2 text-xs font-bold rounded-full border transition ${currentPage === 1 ? 'text-slate-300 border-slate-100 cursor-not-allowed' : 'text-slate-600 border-slate-200 hover:bg-white hover:border-emerald-500 hover:text-emerald-600'}`;
+                    prevBtn.disabled = currentPage === 1;
+                    prevBtn.onclick = () => { currentPage--; renderTable(); };
+                    paginationButtons.appendChild(prevBtn);
+
+                    // Tombol Halaman (Hanya tampilkan jika lebih dari 1 halaman)
+                    if (totalPages > 1) {
+                        for (let i = 1; i <= totalPages; i++) {
+                            const pageBtn = document.createElement('button');
+                            pageBtn.innerText = i;
+                            pageBtn.className = `h-8 w-8 text-xs font-bold rounded-full transition border ${i === currentPage ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-200 text-slate-600 hover:border-emerald-500'}`;
+                            pageBtn.onclick = () => { currentPage = i; renderTable(); };
+                            paginationButtons.appendChild(pageBtn);
+                        }
+                    }
+
+                    // Tombol Next
+                    const nextBtn = document.createElement('button');
+                    nextBtn.innerText = 'Selanjutnya';
+                    nextBtn.className = `px-4 py-2 text-xs font-bold rounded-full border transition ${currentPage === totalPages || totalPages === 0 ? 'text-slate-300 border-slate-100 cursor-not-allowed' : 'text-slate-600 border-slate-200 hover:bg-white hover:border-emerald-500 hover:text-emerald-600'}`;
+                    nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+                    nextBtn.onclick = () => { currentPage++; renderTable(); };
+                    paginationButtons.appendChild(nextBtn);
+                }
+
+                // Event Listener Search
+                searchInput.addEventListener('input', (e) => {
+                    const term = e.target.value.toLowerCase();
+                    filteredUsers = allUsers.filter(u => 
+                        u.nama.toLowerCase().includes(term) || 
+                        u.email.toLowerCase().includes(term) || 
+                        u.akun_id.toLowerCase().includes(term)
+                    );
+                    currentPage = 1; // Reset ke halaman pertama setiap cari
+                    renderTable();
+                });
+
+                // Inisialisasi awal
+                document.addEventListener('DOMContentLoaded', renderTable);
+            </script>
+        </div>
 
         <div id="tab-produk" class="tab-content hidden animate-fade-in">
             <div class="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
