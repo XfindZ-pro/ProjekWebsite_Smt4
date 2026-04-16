@@ -218,10 +218,10 @@ class AkunModel
     }
 
     // Menarik semua data pengguna dari tabel akun untuk Manajemen Pengguna
-    public function getAllUsers()
-    {
+    public function getAllUsers() {
         try {
-            $stmt = $this->db->conn()->prepare("SELECT akun_id, nama, email, peran, status_verifikasi FROM akun ORDER BY created_at DESC");
+            // FIX: Tambahkan foto_profil, foto_banner, dan created_at ke dalam query
+            $stmt = $this->db->conn()->prepare("SELECT akun_id, nama, email, peran, status_verifikasi, foto_profil, foto_banner, created_at FROM akun ORDER BY created_at DESC");
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {

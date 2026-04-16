@@ -186,7 +186,7 @@
             </div>
         </div>
 
-  <div id="tab-pengguna" class="tab-content hidden animate-fade-in">
+<div id="tab-pengguna" class="tab-content hidden animate-fade-in">
             <div class="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
                 <div class="p-6 border-b border-slate-100 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
@@ -218,13 +218,224 @@
                 </div>
 
                 <div class="p-6 border-t border-slate-100 bg-slate-50/50 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <p class="text-sm text-slate-500" id="paginationInfo">
-                        Menampilkan 0 sampai 0 dari 0 data
-                    </p>
-                    <div class="flex items-center gap-2" id="paginationButtons">
-                        </div>
+                    <p class="text-sm text-slate-500" id="paginationInfo">Menampilkan 0 sampai 0 dari 0 data</p>
+                    <div class="flex items-center gap-2" id="paginationButtons"></div>
                 </div>
             </div>
+
+            <div id="userDetailModal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-slate-900/60 px-4 py-8 backdrop-blur-sm transition-opacity">
+                <div class="relative w-full max-w-2xl rounded-[32px] bg-white shadow-2xl overflow-hidden transform scale-95 opacity-0 transition-all duration-300" id="userDetailContent">
+                    <button onclick="closeUserModal()" class="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/30 text-white hover:bg-black/50 backdrop-blur-md transition">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+
+                    <div class="h-40 w-full bg-slate-200 relative">
+                        <img id="modalUserBanner" src="" class="w-full h-full object-cover" alt="Banner Profil">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                    </div>
+
+                    <div class="px-8 pb-8 relative">
+                        <div class="absolute -top-16 left-8">
+                            <img id="modalUserPhoto" src="" class="h-28 w-28 rounded-full border-4 border-white object-cover shadow-lg bg-white" alt="Foto Profil">
+                        </div>
+                        
+                        <div class="pt-16">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h2 id="modalUserName" class="text-2xl font-bold text-slate-900">Nama User</h2>
+                                    <p id="modalUserEmail" class="text-slate-500 font-medium">email@user.com</p>
+                                </div>
+                                <span id="modalUserRole" class="px-4 py-1.5 rounded-full text-xs font-black tracking-widest uppercase border border-slate-200 bg-slate-50 text-slate-700 shadow-sm">ROLE</span>
+                            </div>
+
+                            <div class="mt-8 grid grid-cols-2 gap-4">
+                                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">ID Akun</p>
+                                    <p id="modalUserId" class="font-mono text-sm font-bold text-slate-700">akun000000</p>
+                                </div>
+                                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Status Verifikasi</p>
+                                    <div id="modalUserStatusContainer"></div>
+                                </div>
+                                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 col-span-2">
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Tanggal Terdaftar</p>
+                                    <p id="modalUserJoined" class="text-sm font-bold text-slate-700">-</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                const allUsers = <?= json_encode($data['users_list'] ?? []); ?>;
+                let filteredUsers = [...allUsers];
+                let currentPage = 1;
+                const rowsPerPage = 10;
+
+                const searchInput = document.getElementById('userSearchInput');
+                const tableBody = document.getElementById('userTableBody');
+                const paginationInfo = document.getElementById('paginationInfo');
+                const paginationButtons = document.getElementById('paginationButtons');
+                
+                // Variabel Modal
+                const userModal = document.getElementById('userDetailModal');
+                const userModalContent = document.getElementById('userDetailContent');
+
+                function renderTable() {
+                    const start = (currentPage - 1) * rowsPerPage;
+                    const end = start + rowsPerPage;
+                    const paginatedItems = filteredUsers.slice(start, end);
+
+                    tableBody.innerHTML = '';
+
+                    if (paginatedItems.length === 0) {
+                        tableBody.innerHTML = `<tr><td colspan="4" class="p-12 text-center text-slate-400 font-medium">Data tidak ditemukan.</td></tr>`;
+                        updatePagination();
+                        return;
+                    }
+
+                    paginatedItems.forEach(u => {
+                        let statusClass = 'bg-slate-100 text-slate-700';
+                        let statusLabel = 'Tanpa Verifikasi';
+                        if(u.status_verifikasi === 'disetujui') {
+                            statusClass = 'bg-emerald-50 text-emerald-700';
+                            statusLabel = 'Disetujui';
+                        } else if(u.status_verifikasi === 'menunggu') {
+                            statusClass = 'bg-blue-50 text-blue-700';
+                            statusLabel = 'Menunggu';
+                        } else if(u.status_verifikasi === 'ditolak') {
+                            statusClass = 'bg-red-50 text-red-700';
+                            statusLabel = 'Ditolak';
+                        }
+
+                        // Menambahkan cursor-pointer dan onclick pada row
+                        const row = `
+                            <tr class="hover:bg-slate-50 transition group cursor-pointer" onclick="openUserModal('${u.akun_id}')">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <img src="${u.foto_profil}" class="w-8 h-8 rounded-full object-cover border border-slate-200">
+                                        <div>
+                                            <div class="font-bold text-slate-900 group-hover:text-emerald-600 transition">${u.nama}</div>
+                                            <div class="text-xs text-slate-400 font-mono">${u.akun_id}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 font-medium">${u.email}</td>
+                                <td class="px-6 py-4 uppercase text-[10px] font-black tracking-widest text-slate-400">
+                                    <span class="border border-slate-200 px-2 py-0.5 rounded">${u.peran}</span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="rounded-full px-3 py-1 text-xs font-bold ${statusClass}">${statusLabel}</span>
+                                </td>
+                            </tr>
+                        `;
+                        tableBody.innerHTML += row;
+                    });
+
+                    updatePagination();
+                }
+
+                // Fungsi Membuka Modal
+                function openUserModal(akunId) {
+                    const user = allUsers.find(u => u.akun_id === akunId);
+                    if (!user) return;
+
+                    // Mengisi Data
+                    document.getElementById('modalUserName').innerText = user.nama;
+                    document.getElementById('modalUserEmail').innerText = user.email;
+                    document.getElementById('modalUserId').innerText = user.akun_id;
+                    document.getElementById('modalUserRole').innerText = user.peran;
+                    document.getElementById('modalUserJoined').innerText = user.created_at ? user.created_at : '-';
+                    document.getElementById('modalUserPhoto').src = user.foto_profil;
+                    document.getElementById('modalUserBanner').src = user.foto_banner;
+
+                    // Menyiapkan Badge Status
+                    let statusClass = 'bg-slate-100 text-slate-700';
+                    let statusLabel = 'Tanpa Verifikasi';
+                    if(user.status_verifikasi === 'disetujui') {
+                        statusClass = 'bg-emerald-100 text-emerald-800 border border-emerald-200';
+                        statusLabel = 'Disetujui';
+                    } else if(user.status_verifikasi === 'menunggu') {
+                        statusClass = 'bg-blue-100 text-blue-800 border border-blue-200';
+                        statusLabel = 'Menunggu';
+                    } else if(user.status_verifikasi === 'ditolak') {
+                        statusClass = 'bg-red-100 text-red-800 border border-red-200';
+                        statusLabel = 'Ditolak';
+                    }
+                    document.getElementById('modalUserStatusContainer').innerHTML = `<span class="px-4 py-1.5 rounded-full text-xs font-bold ${statusClass}">${statusLabel}</span>`;
+
+                    // Menampilkan Modal dengan Efek Animasi
+                    userModal.classList.remove('hidden');
+                    userModal.classList.add('flex');
+                    setTimeout(() => {
+                        userModalContent.classList.remove('scale-95', 'opacity-0');
+                        userModalContent.classList.add('scale-100', 'opacity-100');
+                    }, 10);
+                }
+
+                // Fungsi Menutup Modal
+                function closeUserModal() {
+                    userModalContent.classList.remove('scale-100', 'opacity-100');
+                    userModalContent.classList.add('scale-95', 'opacity-0');
+                    setTimeout(() => {
+                        userModal.classList.add('hidden');
+                        userModal.classList.remove('flex');
+                    }, 300); // Sesuai durasi CSS transition
+                }
+
+                // Tutup modal jika area gelap di luar kotak diklik
+                userModal.addEventListener('click', (e) => {
+                    if (e.target === userModal) closeUserModal();
+                });
+
+                function updatePagination() {
+                    const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
+                    const startIdx = filteredUsers.length === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1;
+                    const endIdx = Math.min(currentPage * rowsPerPage, filteredUsers.length);
+
+                    paginationInfo.innerText = `Menampilkan ${startIdx} sampai ${endIdx} dari ${filteredUsers.length} data`;
+                    paginationButtons.innerHTML = '';
+
+                    const prevBtn = document.createElement('button');
+                    prevBtn.innerText = 'Sebelumnya';
+                    prevBtn.className = `px-4 py-2 text-xs font-bold rounded-full border transition ${currentPage === 1 ? 'text-slate-300 border-slate-100 cursor-not-allowed' : 'text-slate-600 border-slate-200 hover:bg-white hover:border-emerald-500 hover:text-emerald-600'}`;
+                    prevBtn.disabled = currentPage === 1;
+                    prevBtn.onclick = () => { currentPage--; renderTable(); };
+                    paginationButtons.appendChild(prevBtn);
+
+                    if (totalPages > 1) {
+                        for (let i = 1; i <= totalPages; i++) {
+                            const pageBtn = document.createElement('button');
+                            pageBtn.innerText = i;
+                            pageBtn.className = `h-8 w-8 text-xs font-bold rounded-full transition border ${i === currentPage ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-200 text-slate-600 hover:border-emerald-500'}`;
+                            pageBtn.onclick = () => { currentPage = i; renderTable(); };
+                            paginationButtons.appendChild(pageBtn);
+                        }
+                    }
+
+                    const nextBtn = document.createElement('button');
+                    nextBtn.innerText = 'Selanjutnya';
+                    nextBtn.className = `px-4 py-2 text-xs font-bold rounded-full border transition ${currentPage === totalPages || totalPages === 0 ? 'text-slate-300 border-slate-100 cursor-not-allowed' : 'text-slate-600 border-slate-200 hover:bg-white hover:border-emerald-500 hover:text-emerald-600'}`;
+                    nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+                    nextBtn.onclick = () => { currentPage++; renderTable(); };
+                    paginationButtons.appendChild(nextBtn);
+                }
+
+                searchInput.addEventListener('input', (e) => {
+                    const term = e.target.value.toLowerCase();
+                    filteredUsers = allUsers.filter(u => 
+                        u.nama.toLowerCase().includes(term) || 
+                        u.email.toLowerCase().includes(term) || 
+                        u.akun_id.toLowerCase().includes(term)
+                    );
+                    currentPage = 1; 
+                    renderTable();
+                });
+
+                document.addEventListener('DOMContentLoaded', renderTable);
+            </script>
+        </div>
 
             <script>
                 // Data asli dari PHP
