@@ -553,6 +553,12 @@ class AkunModel
     public function getKatalogFilter($filter = [])
     {
         try {
+            // FIX ERROR: Ambil koneksi dan pastikan tidak bernilai null sebelum melakukan query
+            $conn = $this->db->conn();
+            if (!$conn) {
+                return []; // Jika gagal terhubung ke database, kembalikan array kosong agar halaman tetap bisa dimuat
+            }
+
             $query = "SELECT * FROM katalog WHERE status_produk = 'aktif'";
             $params = [];
 
@@ -588,13 +594,15 @@ class AkunModel
                     break;
             }
 
-            $stmt = $this->db->conn()->prepare($query);
+            $stmt = $conn->prepare($query);
             foreach ($params as $key => $val) {
                 $stmt->bindValue($key, $val);
             }
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (Exception $e) {
+            
+        // Menangkap exception maupun error fatal (Throwable ada di PHP 7+)
+        } catch (Throwable $e) {
             return [];
         }
     }
