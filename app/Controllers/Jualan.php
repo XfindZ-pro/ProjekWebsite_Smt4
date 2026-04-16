@@ -24,6 +24,13 @@ class Jualan extends Controller {
     }
 
     public function proses() {
+        // FIX ERROR: Proteksi tambahan. Pastikan sesi login masih aktif sebelum memproses form.
+        // Jika sesi habis, kembalikan ke halaman login.
+        if (!isset($_SESSION['user_akun_id'])) {
+            header('Location: ' . BASEURL . '/login');
+            exit;
+        }
+
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $getBlob = function($fileKey) {
                 if (isset($_FILES[$fileKey]) && $_FILES[$fileKey]['error'] == 0) {
@@ -34,12 +41,12 @@ class Jualan extends Controller {
 
             // Menambahkan fallback (??) agar aman dari undefined array key
             $dataProduk = [
-                'penjual_id' => $_SESSION['user_akun_id'],
+                'penjual_id' => $_SESSION['user_akun_id'], // Sekarang ini dipastikan aman karena sudah dicek di atas
                 'nama_produk' => $_POST['nama_produk'] ?? '',
                 'kategori_limbah' => $_POST['kategori_limbah'] ?? '',
                 'berat_tersedia' => $_POST['berat_tersedia'] ?? 0,
                 'harga_per_kg' => $_POST['harga_per_kg'] ?? 0,
-                'min_order' => $_POST['min_order'] ?? 1, // Minimal order default 1 kg
+                'min_order' => $_POST['min_order'] ?? 1,
                 'lokasi_pickup' => $_POST['lokasi_pickup'] ?? '',
                 'kondisi_harga' => $_POST['kondisi_harga'] ?? 'Harga Pas',
                 'deskripsi' => $_POST['deskripsi'] ?? '',
@@ -53,7 +60,7 @@ class Jualan extends Controller {
             ];
 
             if ($this->model('AkunModel')->tambahProduk($dataProduk)) {
-                header('Location: ' . BASEURL . '/caribahanbaku'); // Arahkan ke halaman cari bahan baku setelah berhasil
+                header('Location: ' . BASEURL . '/caribahanbaku'); 
                 exit;
             } else {
                 echo "<script>alert('Gagal mengunggah produk. Pastikan format gambar sesuai.'); window.history.back();</script>";
