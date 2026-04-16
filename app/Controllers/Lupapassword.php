@@ -31,41 +31,113 @@ class Lupapassword extends Controller {
             exit;
         }
 
-        $resetToken = bin2hex(random_bytes(32));
-        $expiry = date('Y-m-d H:i:s', strtotime('+1 hour'));
+        $akunModel->expireOtpsByEmail($email);
+        $otpCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $expiry = date('Y-m-d H:i:s', strtotime('+3 minutes'));
 
-        if (!$akunModel->setResetToken($user['akun_id'], $resetToken, $expiry)) {
+        if (!$akunModel->createOtp($email, $otpCode, $expiry)) {
             header('Location: ' . BASEURL . '/lupapassword?message=' . rawurlencode('Gagal memproses permintaan. Coba lagi.') . '&type=error');
             exit;
         }
 
-        $resetLink = BASEURL . '/lupapassword/reset?token=' . $resetToken;
-
-        if ($this->sendResetEmail($email, $resetLink)) {
-            header('Location: ' . BASEURL . '/lupapassword?message=' . rawurlencode('Link reset password telah dikirim ke email Anda.') . '&type=success');
+        if ($this->sendOtpEmail($email, $otpCode)) {
+            header('Location: ' . BASEURL . '/lupapassword/verify?email=' . rawurlencode($email) . '&message=' . rawurlencode('Kode OTP telah dikirim ke email Anda.') . '&type=success');
         } else {
-            header('Location: ' . BASEURL . '/lupapassword?message=' . rawurlencode('Gagal mengirim email. Hubungi support.') . '&type=error');
+            header('Location: ' . BASEURL . '/lupapassword?message=' . rawurlencode('Gagal mengirim OTP. Hubungi support.') . '&type=error');
+        }
+        exit;
+    }
+
+    public function verify() {
+        $email = trim($_GET['email'] ?? '');
+        if (empty($email)) {
+            header('Location: ' . BASEURL . '/lupapassword');
+            exit;
+        }
+
+        $data['aktif'] = 'lupapassword';
+        $data['email'] = $email;
+        $data['message'] = $_GET['message'] ?? null;
+        $data['message_type'] = $_GET['type'] ?? null;
+
+        $this->view('templates/header', $data);
+        $this->view('lupapassword/verify', $data);
+        $this->view('templates/footer');
+    }
+
+    public function submitOtp() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . BASEURL . '/lupapassword');
+            exit;
+        }
+
+        $email = trim($_POST['email'] ?? '');
+        $kodeOtp = trim($_POST['kode_otp'] ?? '');
+
+        if (empty($email) || empty($kodeOtp)) {
+            header('Location: ' . BASEURL . '/lupapassword/verify?email=' . rawurlencode($email) . '&message=' . rawurlencode('Email dan kode OTP wajib diisi.') . '&type=error');
+            exit;
+        }
+
+        $akunModel = $this->model('AkunModel');
+        $otp = $akunModel->getActiveOtp($email, $kodeOtp);
+
+        if (!$otp || strtotime($otp['waktu_kadaluarsa']) < time()) {
+            header('Location: ' . BASEURL . '/lupapassword/verify?email=' . rawurlencode($email) . '&message=' . rawurlencode('Kode OTP tidak valid atau sudah kadaluarsa.') . '&type=error');
+            exit;
+        }
+
+        $akunModel->useOtp($otp['otp_id']);
+        $user = $akunModel->getAkunByEmail($email);
+
+        $_SESSION['password_reset_akun_id'] = $user['akun_id'];
+        $_SESSION['password_reset_email'] = $email;
+
+        header('Location: ' . BASEURL . '/lupapassword/reset');
+        exit;
+    }
+
+    public function resendOtp() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . BASEURL . '/lupapassword');
+            exit;
+        }
+
+        $email = trim($_POST['email'] ?? '');
+        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            header('Location: ' . BASEURL . '/lupapassword?message=' . rawurlencode('Email tidak valid.') . '&type=error');
+            exit;
+        }
+
+        $akunModel = $this->model('AkunModel');
+        $user = $akunModel->getAkunByEmail($email);
+
+        if (!$user) {
+            header('Location: ' . BASEURL . '/lupapassword?message=' . rawurlencode('Email tidak terdaftar.') . '&type=error');
+            exit;
+        }
+
+        $akunModel->expireOtpsByEmail($email);
+        $otpCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $expiry = date('Y-m-d H:i:s', strtotime('+3 minutes'));
+        $akunModel->createOtp($email, $otpCode, $expiry);
+
+        if ($this->sendOtpEmail($email, $otpCode)) {
+            header('Location: ' . BASEURL . '/lupapassword/verify?email=' . rawurlencode($email) . '&message=' . rawurlencode('OTP baru telah dikirim ke email Anda.') . '&type=success');
+        } else {
+            header('Location: ' . BASEURL . '/lupapassword/verify?email=' . rawurlencode($email) . '&message=' . rawurlencode('Gagal mengirim OTP. Hubungi support.') . '&type=error');
         }
         exit;
     }
 
     public function reset() {
-        $token = $_GET['token'] ?? '';
-        if (empty($token)) {
-            header('Location: ' . BASEURL . '/lupapassword?message=' . rawurlencode('Token tidak valid.') . '&type=error');
-            exit;
-        }
-
-        $akunModel = $this->model('AkunModel');
-        $user = $akunModel->getUserByResetToken($token);
-
-        if (!$user || strtotime($user['reset_expiry']) < time()) {
-            header('Location: ' . BASEURL . '/lupapassword?message=' . rawurlencode('Token kadaluarsa atau tidak valid.') . '&type=error');
+        if (empty($_SESSION['password_reset_akun_id'])) {
+            header('Location: ' . BASEURL . '/lupapassword?message=' . rawurlencode('Silakan verifikasi OTP terlebih dahulu.') . '&type=error');
             exit;
         }
 
         $data['aktif'] = 'lupapassword';
-        $data['token'] = $token;
+        $data['token'] = null;
         $data['message'] = $_GET['message'] ?? null;
         $data['message_type'] = $_GET['type'] ?? null;
 
@@ -80,64 +152,130 @@ class Lupapassword extends Controller {
             exit;
         }
 
-        $token = $_POST['token'] ?? '';
+        if (empty($_SESSION['password_reset_akun_id'])) {
+            header('Location: ' . BASEURL . '/lupapassword?message=' . rawurlencode('Silakan verifikasi OTP terlebih dahulu.') . '&type=error');
+            exit;
+        }
+
         $password = $_POST['password'] ?? '';
         $confirmPassword = $_POST['confirm_password'] ?? '';
 
-        if (empty($token) || empty($password) || $password !== $confirmPassword) {
-            header('Location: ' . BASEURL . '/lupapassword/reset?token=' . rawurlencode($token) . '&message=' . rawurlencode('Password tidak cocok atau kosong.') . '&type=error');
+        if (empty($password) || $password !== $confirmPassword) {
+            header('Location: ' . BASEURL . '/lupapassword/reset?message=' . rawurlencode('Password tidak cocok atau kosong.') . '&type=error');
             exit;
         }
 
         $akunModel = $this->model('AkunModel');
-        $user = $akunModel->getUserByResetToken($token);
-
-        if (!$user || strtotime($user['reset_expiry']) < time()) {
-            header('Location: ' . BASEURL . '/lupapassword?message=' . rawurlencode('Token kadaluarsa.') . '&type=error');
-            exit;
-        }
-
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        if ($akunModel->updatePassword($user['akun_id'], $hashedPassword) && $akunModel->clearResetToken($user['akun_id'])) {
+
+        if ($akunModel->updatePassword($_SESSION['password_reset_akun_id'], $hashedPassword)) {
+            unset($_SESSION['password_reset_akun_id'], $_SESSION['password_reset_email']);
             header('Location: ' . BASEURL . '/login?message=' . rawurlencode('Password berhasil diubah. Silakan login.') . '&type=success');
         } else {
-            header('Location: ' . BASEURL . '/lupapassword/reset?token=' . rawurlencode($token) . '&message=' . rawurlencode('Gagal mengubah password.') . '&type=error');
+            header('Location: ' . BASEURL . '/lupapassword/reset?message=' . rawurlencode('Gagal mengubah password.') . '&type=error');
         }
         exit;
     }
 
-    private function sendResetEmail($email, $resetLink) {
-        require_once __DIR__ . '/../../Libraries/PHPMailer/src/PHPMailer.php';
-        require_once __DIR__ . '/../../Libraries/PHPMailer/src/SMTP.php';
-        require_once __DIR__ . '/../../Libraries/PHPMailer/src/Exception.php';
+    private function sendOtpEmail($email, $otpCode) {
+        $subject = 'Kode OTP Reset Password - Valora';
+        $body = "
+            <h2>Kode OTP Lupa Password</h2>
+            <p>Gunakan kode berikut untuk mereset password Anda:</p>
+            <p style='font-size: 24px; font-weight: bold;'>$otpCode</p>
+            <p>Kode ini akan kedaluwarsa dalam 3 menit.</p>
+        ";
 
-        $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+        if (defined('MAIL_HOST') && defined('MAIL_USERNAME') && defined('MAIL_PASSWORD') && defined('MAIL_FROM')) {
+            return $this->sendOtpWithSmtp($email, $subject, $body);
+        }
 
-        try {
-            $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com'; // Ganti dengan SMTP server Anda
-            $mail->SMTPAuth = true;
-            $mail->Username = 'your-email@gmail.com'; // Ganti dengan email Anda
-            $mail->Password = 'your-app-password'; // Ganti dengan app password
-            $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port = 587;
+        error_log('[OTP] SMTP config not found, trying PHP mail() fallback');
+        return $this->sendOtpWithMailFunction($email, $subject, $body);
+    }
 
-            $mail->setFrom('noreply@valora.id', 'Valora Support');
-            $mail->addAddress($email);
+    private function sendOtpWithSmtp($email, $subject, $body) {
+        $host = MAIL_HOST;
+        $port = MAIL_PORT;
+        $username = MAIL_USERNAME;
+        $password = MAIL_PASSWORD;
+        $from = MAIL_FROM;
+        $fromName = MAIL_FROM_NAME ?? 'Valora Support';
+        $transport = (defined('MAIL_SMTP_SECURE') && MAIL_SMTP_SECURE === 'ssl') ? 'ssl://' : '';
+        $remote = sprintf('%s%s:%d', $transport, $host, $port);
 
-            $mail->isHTML(true);
-            $mail->Subject = 'Reset Password - Valora';
-            $mail->Body = "
-                <h2>Reset Password</h2>
-                <p>Klik link berikut untuk reset password Anda:</p>
-                <a href='$resetLink'>$resetLink</a>
-                <p>Link ini berlaku selama 1 jam.</p>
-            ";
-
-            $mail->send();
-            return true;
-        } catch (Exception $e) {
+        $connection = stream_socket_client($remote, $errno, $errstr, 15);
+        if (!$connection) {
+            error_log("[OTP] SMTP connect failed: $errno - $errstr");
             return false;
         }
+
+        stream_set_timeout($connection, 15);
+        if (!$this->smtpRead($connection, '220')) {
+            fclose($connection);
+            return false;
+        }
+
+        $hostname = $_SERVER['SERVER_NAME'] ?? 'localhost';
+        if (!$this->smtpWrite($connection, "EHLO $hostname\r\n", '250')) { fclose($connection); return false; }
+        if (!$this->smtpWrite($connection, "AUTH LOGIN\r\n", '334')) { fclose($connection); return false; }
+        if (!$this->smtpWrite($connection, base64_encode($username) . "\r\n", '334')) { fclose($connection); return false; }
+        if (!$this->smtpWrite($connection, base64_encode($password) . "\r\n", '235')) { fclose($connection); return false; }
+        if (!$this->smtpWrite($connection, "MAIL FROM:<$username>\r\n", '250')) { fclose($connection); return false; }
+        if (!$this->smtpWrite($connection, "RCPT TO:<$email>\r\n", '250')) { fclose($connection); return false; }
+        if (!$this->smtpWrite($connection, "DATA\r\n", '354')) { fclose($connection); return false; }
+
+        $headers = "From: $fromName <$from>\r\n";
+        $headers .= "MIME-Version: 1.0\r\n";
+        $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+        $headers .= "To: $email\r\n";
+        $headers .= "Subject: $subject\r\n";
+
+        $message = $headers . "\r\n" . $body . "\r\n.\r\n";
+        if (!$this->smtpWriteRaw($connection, $message, '250')) { fclose($connection); return false; }
+        $this->smtpWrite($connection, "QUIT\r\n", '221');
+        fclose($connection);
+
+        return true;
+    }
+
+    private function sendOtpWithMailFunction($email, $subject, $body) {
+        $headers = 'From: Valora Support <' . MAIL_FROM . '>' . "\r\n";
+        $headers .= 'MIME-Version: 1.0' . "\r\n";
+        $headers .= 'Content-Type: text/html; charset=UTF-8' . "\r\n";
+
+        $result = mail($email, $subject, $body, $headers);
+        if (!$result) {
+            error_log("[OTP] PHP mail() failed for $email");
+        }
+
+        return $result;
+    }
+
+    private function smtpRead($connection, $expectedCode) {
+        $response = '';
+        while (($line = fgets($connection, 515)) !== false) {
+            $response .= $line;
+            if (isset($line[3]) && $line[3] !== '-') {
+                break;
+            }
+        }
+
+        if (substr($response, 0, 3) !== $expectedCode) {
+            error_log("[OTP] SMTP response expected {$expectedCode}, got: {$response}");
+            return false;
+        }
+
+        return true;
+    }
+
+    private function smtpWrite($connection, $command, $expectedCode) {
+        fwrite($connection, $command);
+        return $this->smtpRead($connection, $expectedCode);
+    }
+
+    private function smtpWriteRaw($connection, $data, $expectedCode) {
+        fwrite($connection, $data);
+        return $this->smtpRead($connection, $expectedCode);
     }
 }

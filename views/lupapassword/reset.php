@@ -13,7 +13,6 @@
         <?php endif; ?>
 
         <form action="<?= BASEURL; ?>/lupapassword/updatePassword" method="post" class="rounded-[32px] border border-slate-200 bg-white shadow-sm p-8">
-            <input type="hidden" name="token" value="<?= htmlspecialchars($token); ?>" />
             <div class="space-y-6">
                 <div>
                     <label for="password" class="block text-sm font-medium text-slate-700">Password Baru</label>

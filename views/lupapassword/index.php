@@ -3,7 +3,7 @@
         <div class="text-center mb-8">
             <p class="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-600">Lupa Password</p>
             <h1 class="mt-4 text-3xl font-extrabold tracking-tight text-slate-900">Reset Password Anda</h1>
-            <p class="mt-4 text-slate-600 text-base">Masukkan email akun Anda untuk menerima link reset password.</p>
+            <p class="mt-4 text-slate-600 text-base">Masukkan email akun Anda untuk menerima kode OTP reset password yang berlaku 3 menit.</p>
         </div>
 
         <?php if (!empty($message)) : ?>
@@ -20,7 +20,7 @@
                 </div>
 
                 <div class="text-center">
-                    <button type="submit" class="inline-flex items-center justify-center rounded-full bg-emerald-600 px-8 py-4 text-base font-semibold text-white shadow-md hover:bg-emerald-700 transition">Kirim Link Reset</button>
+                    <button type="submit" class="inline-flex items-center justify-center rounded-full bg-emerald-600 px-8 py-4 text-base font-semibold text-white shadow-md hover:bg-emerald-700 transition">Kirim Kode OTP</button>
                 </div>
             </div>
         </form>
