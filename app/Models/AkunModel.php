@@ -103,37 +103,55 @@ class AkunModel
         return $stmt->execute();
     }
 
-    public function generateVerifikasiId()
-    {
-        $stmt = $this->db->conn()->prepare("SELECT verifikasi_id FROM verifikasi_bisnis ORDER BY verifikasi_id DESC LIMIT 1");
-        $stmt->execute();
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+   // Fungsi untuk membuat ID Verifikasi unik (Contoh: verifikasiakun12345)
+    public function generateVerifikasiId() {
+        do {
+            // Hasilkan 5 angka acak. str_pad digunakan agar tetap 5 digit meskipun angka di depan 0
+            $angka_acak = str_pad(rand(0, 99999), 5, '0', STR_PAD_LEFT);
+            $id_baru = 'verifikasiakun' . $angka_acak;
 
-        if ($row && preg_match('/^(verif)(\d+)$/', $row['verifikasi_id'], $matches)) {
-            $number = (int) $matches[2] + 1;
-        } else {
-            $number = 1;
-        }
+            // Cek apakah ID ini sudah pernah ada di database
+            $stmt = $this->db->conn()->prepare("SELECT verifikasi_id FROM verifikasi_bisnis WHERE verifikasi_id = :id");
+            $stmt->bindParam(':id', $id_baru);
+            $stmt->execute();
+            
+            // Jika rowCount() > 0, berarti ID sudah ada, maka perulangan akan diulang (membuat angka baru)
+        } while ($stmt->rowCount() > 0);
 
-        return 'verif' . str_pad($number, 9, '0', STR_PAD_LEFT);
+        return $id_baru;
     }
 
-    public function ajukanVerifikasi($data)
-    {
-        $verifikasi_id = $this->generateVerifikasiId();
+  public function ajukanVerifikasi($data) {
+        try {
+            // Panggil fungsi pembuat ID otomatis tanpa duplikat
+            $verifikasi_id = $this->generateVerifikasiId();
 
-        $query = "INSERT INTO verifikasi_bisnis (verifikasi_id, akun_id, jenis_entitas, nama_usaha, file_ktp, file_izin_usaha, alamat_usaha, nomor_telepon) VALUES (:verifikasi_id, :akun_id, :jenis_entitas, :nama_usaha, :file_ktp, :file_izin_usaha, :alamat_usaha, :nomor_telepon)";
-        $stmt = $this->db->conn()->prepare($query);
-        $stmt->bindParam(':verifikasi_id', $verifikasi_id);
-        $stmt->bindParam(':akun_id', $data['akun_id']);
-        $stmt->bindParam(':jenis_entitas', $data['jenis_entitas']);
-        $stmt->bindParam(':nama_usaha', $data['nama_usaha']);
-        $stmt->bindValue(':file_ktp', $data['file_ktp'], PDO::PARAM_LOB);
-        $stmt->bindValue(':file_izin_usaha', $data['file_izin_usaha'], PDO::PARAM_LOB);
-        $stmt->bindParam(':alamat_usaha', $data['alamat_usaha']);
-        $stmt->bindParam(':nomor_telepon', $data['nomor_telepon']);
+            // Sisa query insert tetap menggunakan logika milikmu sebelumnya
+            // Pastikan bindParam untuk :verifikasi_id mengambil dari variabel di atas
+            $query = "INSERT INTO verifikasi_bisnis (
+                        verifikasi_id, akun_id, jenis_entitas, nama_usaha, file_ktp, file_izin_usaha, alamat_usaha, nomor_telepon
+                      ) VALUES (
+                        :verifikasi_id, :akun_id, :jenis_entitas, :nama_usaha, :file_ktp, :file_izin_usaha, :alamat_usaha, :nomor_telepon
+                      )";
 
-        return $stmt->execute();
+            $stmt = $this->db->conn()->prepare($query);
+            
+            // Proses Binding Data
+            $stmt->bindParam(':verifikasi_id', $verifikasi_id);
+            $stmt->bindParam(':akun_id', $data['akun_id']);
+            $stmt->bindParam(':jenis_entitas', $data['jenis_entitas']);
+            $stmt->bindParam(':nama_usaha', $data['nama_usaha']);
+            $stmt->bindValue(':file_ktp', $data['file_ktp'], PDO::PARAM_LOB);
+            $stmt->bindValue(':file_izin_usaha', $data['file_izin_usaha'], PDO::PARAM_LOB);
+            $stmt->bindParam(':alamat_usaha', $data['alamat_usaha']);
+            $stmt->bindParam(':nomor_telepon', $data['nomor_telepon']);
+
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            // Bisa digunakan untuk debugging saat error
+            error_log("Gagal ajukan verifikasi: " . $e->getMessage());
+            return false;
+        }
     }
 
     public function updateStatusVerifikasi($akun_id, $status)
@@ -427,6 +445,8 @@ class AkunModel
             return false;
         }
     }
+
+    
 
     // Menarik data katalog dengan fitur Filter, Search, dan Sorting
     public function getKatalogFilter($filter = [])
