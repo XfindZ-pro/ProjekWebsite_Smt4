@@ -3,12 +3,17 @@
 class Home extends Controller {
     
     public function index() {
-        // 1. Buat data penanda halaman aktif
         $data['aktif'] = 'beranda';
+        $data['has_products'] = false; // Nilai default
         
-        // 2. Kirim $data ke header
+        // Jika pengguna sudah login, cek apakah dia punya produk
+        if (isset($_SESSION['user_akun_id'])) {
+            $akunModel = $this->model('AkunModel');
+            $data['has_products'] = $akunModel->hasProducts($_SESSION['user_akun_id']);
+        }
+        
         $this->view('templates/header', $data);
-        $this->view('home/index');
+        $this->view('home/index', $data);
         $this->view('templates/footer');
     }
-}   
+}

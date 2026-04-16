@@ -21,17 +21,27 @@
                         Platform digital pertama yang menghubungkan pabrik dan produsen dengan UMKM serta industri kreatif untuk mendistribusikan sisa bahan produksi yang masih bernilai.
                     </p>
                     
-                    <div class="mt-5 sm:mt-8 flex flex-col sm:flex-row sm:justify-center lg:justify-start gap-4" data-aos="fade-up" data-aos-delay="400">
+                 <div class="mt-5 sm:mt-8 flex flex-col sm:flex-row flex-wrap sm:justify-center lg:justify-start gap-4" data-aos="fade-up" data-aos-delay="400">
                         <div class="rounded-lg shadow w-full sm:w-auto">
                             <a href="<?= BASEURL; ?>/caribahanbaku" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-emerald-600 hover:bg-emerald-700 md:py-4 md:text-lg transition transform hover:scale-105 shadow-md">
                                 Cari Bahan Baku
                             </a>
                         </div>
                         <div class="w-full sm:w-auto">
-                            <a href="<?= BASEURL; ?>/jualan" class="inline-flex items-center justify-center px-8 py-3 border-2 border-emerald-600 text-base font-medium rounded-full text-emerald-700 bg-emerald-50 hover:bg-emerald-100 md:py-4 md:text-lg transition transform hover:-translate-y-0.5 shadow-sm">
+                            <a href="<?= BASEURL; ?>/jualan" class="inline-flex items-center justify-center px-8 py-3 border-2 border-emerald-600 text-base font-medium rounded-full text-emerald-700 bg-emerald-50 hover:bg-emerald-100 md:py-4 md:text-lg transition transform hover:-translate-y-0.5 shadow-sm w-full">
                                 Jual Limbah dan Barang Bekas
                             </a>
                         </div>
+                        
+                        <?php if(isset($data['has_products']) && $data['has_products']): ?>
+                        <div class="w-full sm:w-auto mt-2 sm:mt-0">
+                            <a href="<?= BASEURL; ?>/produksaya" class="inline-flex items-center justify-center px-8 py-3 border-2 border-slate-800 text-base font-bold rounded-full text-white bg-slate-800 hover:bg-slate-900 md:py-4 md:text-lg transition transform hover:-translate-y-0.5 shadow-lg w-full">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                                Produk Saya
+                            </a>
+                        </div>
+                        <?php endif; ?>
+                    </div>
                     </div>
                 </div>
             </main>

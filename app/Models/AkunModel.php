@@ -446,7 +446,30 @@ class AkunModel
         }
     }
 
-    
+    // Menarik semua produk spesifik milik seorang penjual
+    public function getProdukByPenjual($akun_id) {
+        try {
+            $stmt = $this->db->conn()->prepare("SELECT * FROM katalog WHERE penjual_id = :akun_id ORDER BY created_at DESC");
+            $stmt->bindParam(':akun_id', $akun_id);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+
+    // Mengecek apakah penjual memiliki minimal 1 produk di katalog
+    public function hasProducts($akun_id) {
+        try {
+            $stmt = $this->db->conn()->prepare("SELECT COUNT(*) AS total FROM katalog WHERE penjual_id = :akun_id");
+            $stmt->bindParam(':akun_id', $akun_id);
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return ($result['total'] > 0);
+        } catch (Exception $e) {
+            return false;
+        }
+    }
 
     // Menarik data katalog dengan fitur Filter, Search, dan Sorting
     public function getKatalogFilter($filter = [])
