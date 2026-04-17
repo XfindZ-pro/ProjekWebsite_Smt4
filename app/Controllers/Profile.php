@@ -68,6 +68,7 @@ class Profile extends Controller {
         $pathField = $photoType === 'profil' ? 'foto_profil' : 'foto_banner';
         $akunId = $_SESSION['user_akun_id'];
 
+        // Mengambil data biner asli
         $imageData = file_get_contents($_FILES['photo']['tmp_name']);
         if ($imageData === false) {
             echo json_encode(['success' => false, 'message' => 'Gagal membaca file gambar.']);
@@ -80,14 +81,25 @@ class Profile extends Controller {
             exit;
         }
 
+        // FIX: Perbarui Sesi dengan format yang sama (Biner/BLOB)
         if ($photoType === 'profil') {
-            $imageInfo = @getimagesizefromstring($imageData);
-            if ($imageInfo) {
-                $_SESSION['user_foto'] = 'data:' . $imageInfo['mime'] . ';base64,' . base64_encode($imageData);
-            }
+            $_SESSION['user_foto'] = $imageData;
         }
 
         echo json_encode(['success' => true, 'message' => 'Foto berhasil diperbarui.']);
         exit;
+    }
+    
+    // Fungsi Update Nama (Ditambahkan dari permintaan sebelumnya agar lengkap)
+    public function updateNama() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_SESSION['user_akun_id'])) {
+            $nama_baru = $_POST['nama_baru'];
+            if ($this->model('AkunModel')->updateNama($_SESSION['user_akun_id'], $nama_baru)) {
+                // Perbarui session agar header langsung berubah
+                $_SESSION['user_nama'] = $nama_baru; 
+            }
+            header('Location: ' . BASEURL . '/profile');
+            exit;
+        }
     }
 }

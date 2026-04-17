@@ -8,40 +8,42 @@
 <body>
 <div class="relative bg-white overflow-hidden flex-grow">
     <div class="max-w-7xl mx-auto">
-        <div class="relative z-10 pb-12 bg-white sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32 pt-12 sm:pt-20 lg:pt-28">
-            <main class="mt-4 mx-auto max-w-7xl px-4 sm:mt-8 sm:px-6 md:mt-12 lg:mt-16 lg:px-8 xl:mt-20">
+        <div class="relative z-10 pb-12 bg-white sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32 pt-2 sm:pt-6 lg:pt-8">
+            <main class="mt-0 mx-auto max-w-7xl px-4 sm:px-6 md:mt-2 lg:mt-4 lg:px-8">
                 
                 <div class="text-center lg:text-left" data-aos="fade-up">
-                    <h1 class="text-4xl tracking-tight font-extrabold text-slate-900 sm:text-5xl md:text-6xl">
+                    <h1 class="text-3xl tracking-tight font-extrabold text-slate-900 sm:text-4xl md:text-5xl">
                         <span class="block xl:inline">Transformasi Limbah</span>
                         <span class="block text-emerald-600 xl:inline tracking-wide">Menjadi Nilai Ekonomi</span>
                     </h1>
                     
-                    <p class="mt-3 text-base text-slate-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0" data-aos="fade-up" data-aos-delay="200">
+                    <p class="mt-3 text-sm text-slate-500 sm:mt-5 sm:text-base sm:max-w-xl sm:mx-auto md:mt-5 md:text-lg lg:mx-0" data-aos="fade-up" data-aos-delay="200">
                         Platform digital pertama yang menghubungkan pabrik dan produsen dengan UMKM serta industri kreatif untuk mendistribusikan sisa bahan produksi yang masih bernilai.
                     </p>
                     
-                 <div class="mt-5 sm:mt-8 flex flex-col sm:flex-row flex-wrap sm:justify-center lg:justify-start gap-4" data-aos="fade-up" data-aos-delay="400">
-                        <div class="rounded-lg shadow w-full sm:w-auto">
-                            <a href="<?= BASEURL; ?>/caribahanbaku" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-emerald-600 hover:bg-emerald-700 md:py-4 md:text-lg transition transform hover:scale-105 shadow-md">
+                    <div class="mt-5 sm:mt-8 flex flex-col items-center lg:items-start gap-4" data-aos="fade-up" data-aos-delay="400">
+                        
+                        <div class="w-full sm:w-auto">
+                            <a href="<?= BASEURL; ?>/caribahanbaku" class="w-full flex items-center justify-center px-6 py-2.5 border border-transparent text-sm font-bold rounded-full text-white bg-emerald-600 hover:bg-emerald-700 md:py-3 md:px-8 md:text-base transition transform hover:-translate-y-0.5 shadow-md">
                                 Cari Bahan Baku
                             </a>
                         </div>
+                        
                         <div class="w-full sm:w-auto">
-                            <a href="<?= BASEURL; ?>/jualan" class="inline-flex items-center justify-center px-8 py-3 border-2 border-emerald-600 text-base font-medium rounded-full text-emerald-700 bg-emerald-50 hover:bg-emerald-100 md:py-4 md:text-lg transition transform hover:-translate-y-0.5 shadow-sm w-full">
+                            <a href="<?= BASEURL; ?>/jualan" class="inline-flex items-center justify-center px-6 py-2.5 border-2 border-emerald-600 text-sm font-bold rounded-full text-emerald-700 bg-emerald-50 hover:bg-emerald-100 md:py-3 md:px-8 md:text-base transition transform hover:-translate-y-0.5 shadow-sm w-full">
                                 Jual Limbah dan Barang Bekas
                             </a>
                         </div>
                         
                         <?php if(isset($data['has_products']) && $data['has_products']): ?>
-                        <div class="w-full sm:w-auto mt-2 sm:mt-0">
-                            <a href="<?= BASEURL; ?>/produksaya" class="inline-flex items-center justify-center px-8 py-3 border-2 border-slate-800 text-base font-bold rounded-full text-white bg-slate-800 hover:bg-slate-900 md:py-4 md:text-lg transition transform hover:-translate-y-0.5 shadow-lg w-full">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                        <div class="w-full sm:w-auto">
+                            <a href="<?= BASEURL; ?>/produksaya" class="inline-flex items-center justify-center px-6 py-2.5 border-2 border-slate-800 text-sm font-bold rounded-full text-white bg-slate-800 hover:bg-slate-900 md:py-3 md:px-8 md:text-base transition transform hover:-translate-y-0.5 shadow-lg w-full">
+                                <svg class="w-4 h-4 md:w-5 md:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                                 Produk Saya
                             </a>
                         </div>
                         <?php endif; ?>
-                    </div>
+                        
                     </div>
                 </div>
             </main>

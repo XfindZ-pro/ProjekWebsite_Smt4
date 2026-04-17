@@ -103,8 +103,9 @@ class AkunModel
         return $stmt->execute();
     }
 
-   // Fungsi untuk membuat ID Verifikasi unik (Contoh: verifikasiakun12345)
-    public function generateVerifikasiId() {
+    // Fungsi untuk membuat ID Verifikasi unik (Contoh: verifikasiakun12345)
+    public function generateVerifikasiId()
+    {
         do {
             // Hasilkan 5 angka acak. str_pad digunakan agar tetap 5 digit meskipun angka di depan 0
             $angka_acak = str_pad(rand(0, 99999), 5, '0', STR_PAD_LEFT);
@@ -114,14 +115,15 @@ class AkunModel
             $stmt = $this->db->conn()->prepare("SELECT verifikasi_id FROM verifikasi_bisnis WHERE verifikasi_id = :id");
             $stmt->bindParam(':id', $id_baru);
             $stmt->execute();
-            
+
             // Jika rowCount() > 0, berarti ID sudah ada, maka perulangan akan diulang (membuat angka baru)
         } while ($stmt->rowCount() > 0);
 
         return $id_baru;
     }
 
-  public function ajukanVerifikasi($data) {
+    public function ajukanVerifikasi($data)
+    {
         try {
             // Panggil fungsi pembuat ID otomatis tanpa duplikat
             $verifikasi_id = $this->generateVerifikasiId();
@@ -135,7 +137,7 @@ class AkunModel
                       )";
 
             $stmt = $this->db->conn()->prepare($query);
-            
+
             // Proses Binding Data
             $stmt->bindParam(':verifikasi_id', $verifikasi_id);
             $stmt->bindParam(':akun_id', $data['akun_id']);
@@ -236,7 +238,8 @@ class AkunModel
     }
 
     // Menarik semua data pengguna dari tabel akun untuk Manajemen Pengguna
-    public function getAllUsers() {
+    public function getAllUsers()
+    {
         try {
             // FIX: Tambahkan foto_profil, foto_banner, dan created_at ke dalam query
             $stmt = $this->db->conn()->prepare("SELECT akun_id, nama, email, peran, status_verifikasi, foto_profil, foto_banner, created_at FROM akun ORDER BY created_at DESC");
@@ -447,7 +450,8 @@ class AkunModel
     }
 
     // Menarik semua produk spesifik milik seorang penjual
-    public function getProdukByPenjual($akun_id) {
+    public function getProdukByPenjual($akun_id)
+    {
         try {
             $stmt = $this->db->conn()->prepare("SELECT * FROM katalog WHERE penjual_id = :akun_id ORDER BY created_at DESC");
             $stmt->bindParam(':akun_id', $akun_id);
@@ -459,7 +463,8 @@ class AkunModel
     }
 
     // Mengecek apakah penjual memiliki minimal 1 produk di katalog
-    public function hasProducts($akun_id) {
+    public function hasProducts($akun_id)
+    {
         try {
             $stmt = $this->db->conn()->prepare("SELECT COUNT(*) AS total FROM katalog WHERE penjual_id = :akun_id");
             $stmt->bindParam(':akun_id', $akun_id);
@@ -471,8 +476,9 @@ class AkunModel
         }
     }
 
-// Menarik satu produk berdasarkan ID-nya
-    public function getProdukById($id) {
+    // Menarik satu produk berdasarkan ID-nya
+    public function getProdukById($id)
+    {
         try {
             $stmt = $this->db->conn()->prepare("SELECT * FROM katalog WHERE produk_id = :id");
             $stmt->bindParam(':id', $id);
@@ -484,7 +490,8 @@ class AkunModel
     }
 
     // Memperbarui data produk yang sudah ada
-    public function updateProduk($data) {
+    public function updateProduk($data)
+    {
         try {
             // Query dinamis untuk menangani apakah foto diperbarui atau tidak
             $query = "UPDATE katalog SET 
@@ -499,17 +506,21 @@ class AkunModel
                         kondisi_fisik = :kondisi_fisik, 
                         metode_pengemasan = :metode_pengemasan,
                         status_produk = :status_produk";
-            
+
             // Tambahkan kolom foto ke query hanya jika ada file baru diunggah
-            if ($data['foto_1'] !== null) $query .= ", foto_1 = :foto_1";
-            if ($data['foto_2'] !== null) $query .= ", foto_2 = :foto_2";
-            if ($data['foto_3'] !== null) $query .= ", foto_3 = :foto_3";
-            if ($data['dokumen_pendukung'] !== null) $query .= ", dokumen_pendukung = :dokumen_pendukung";
+            if ($data['foto_1'] !== null)
+                $query .= ", foto_1 = :foto_1";
+            if ($data['foto_2'] !== null)
+                $query .= ", foto_2 = :foto_2";
+            if ($data['foto_3'] !== null)
+                $query .= ", foto_3 = :foto_3";
+            if ($data['dokumen_pendukung'] !== null)
+                $query .= ", dokumen_pendukung = :dokumen_pendukung";
 
             $query .= " WHERE produk_id = :produk_id AND penjual_id = :penjual_id";
 
             $stmt = $this->db->conn()->prepare($query);
-            
+
             // Bind parameter dasar
             $stmt->bindParam(':produk_id', $data['produk_id']);
             $stmt->bindParam(':penjual_id', $data['penjual_id']);
@@ -526,10 +537,14 @@ class AkunModel
             $stmt->bindParam(':status_produk', $data['status_produk']);
 
             // Bind foto hanya jika ada data baru
-            if ($data['foto_1'] !== null) $stmt->bindValue(':foto_1', $data['foto_1'], PDO::PARAM_LOB);
-            if ($data['foto_2'] !== null) $stmt->bindValue(':foto_2', $data['foto_2'], PDO::PARAM_LOB);
-            if ($data['foto_3'] !== null) $stmt->bindValue(':foto_3', $data['foto_3'], PDO::PARAM_LOB);
-            if ($data['dokumen_pendukung'] !== null) $stmt->bindValue(':dokumen_pendukung', $data['dokumen_pendukung'], PDO::PARAM_LOB);
+            if ($data['foto_1'] !== null)
+                $stmt->bindValue(':foto_1', $data['foto_1'], PDO::PARAM_LOB);
+            if ($data['foto_2'] !== null)
+                $stmt->bindValue(':foto_2', $data['foto_2'], PDO::PARAM_LOB);
+            if ($data['foto_3'] !== null)
+                $stmt->bindValue(':foto_3', $data['foto_3'], PDO::PARAM_LOB);
+            if ($data['dokumen_pendukung'] !== null)
+                $stmt->bindValue(':dokumen_pendukung', $data['dokumen_pendukung'], PDO::PARAM_LOB);
 
             return $stmt->execute();
         } catch (Exception $e) {
@@ -538,7 +553,8 @@ class AkunModel
     }
 
     // Menghapus produk dari katalog
-    public function hapusProduk($produk_id, $penjual_id) {
+    public function hapusProduk($produk_id, $penjual_id)
+    {
         try {
             $stmt = $this->db->conn()->prepare("DELETE FROM katalog WHERE produk_id = :p_id AND penjual_id = :u_id");
             $stmt->bindParam(':p_id', $produk_id);
@@ -600,14 +616,21 @@ class AkunModel
             }
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-        // Menangkap exception maupun error fatal (Throwable ada di PHP 7+)
+
+            // Menangkap exception maupun error fatal (Throwable ada di PHP 7+)
         } catch (Throwable $e) {
             return [];
         }
     }
 
-
+    public function updateNama($akun_id, $nama_baru)
+    {
+        $query = "UPDATE akun SET nama = :nama WHERE akun_id = :akun_id";
+        $stmt = $this->db->conn()->prepare($query);
+        $stmt->bindParam(':nama', $nama_baru);
+        $stmt->bindParam(':akun_id', $akun_id);
+        return $stmt->execute();
+    }
 
 
 }

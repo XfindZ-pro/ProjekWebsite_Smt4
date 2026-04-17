@@ -18,10 +18,6 @@
                     <div class="h-24 rounded-3xl bg-slate-200"></div>
                     <div class="h-24 rounded-3xl bg-slate-200"></div>
                 </div>
-                <div class="mt-4 grid gap-4 sm:grid-cols-2">
-                    <div class="h-24 rounded-3xl bg-slate-200"></div>
-                    <div class="h-24 rounded-3xl bg-slate-200"></div>
-                </div>
             </div>
         </div>
     </div>
@@ -117,10 +113,17 @@
                 </div>
 
                 <div class="mt-8 grid gap-4 sm:grid-cols-2">
-                    <div class="rounded-3xl border border-slate-100 bg-slate-50 p-5">
+                    
+                    <div class="rounded-3xl border border-slate-100 bg-slate-50 p-5 relative group transition hover:border-emerald-200 hover:shadow-sm">
                         <p class="text-sm text-slate-500">Nama</p>
-                        <p class="mt-2 text-lg font-semibold text-slate-900"><?= htmlspecialchars($user['nama'] ?? '-'); ?></p>
+                        <div class="mt-2 flex items-center justify-between">
+                            <p class="text-lg font-semibold text-slate-900"><?= htmlspecialchars($user['nama'] ?? '-'); ?></p>
+                            <button id="editNameButton" type="button" class="rounded-full bg-white px-4 py-1.5 text-xs font-bold text-emerald-600 border border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 transition shadow-sm">
+                                Edit
+                            </button>
+                        </div>
                     </div>
+                    
                     <div class="rounded-3xl border border-slate-100 bg-slate-50 p-5">
                         <p class="text-sm text-slate-500">Email</p>
                         <p class="mt-2 text-lg font-semibold text-slate-900"><?= htmlspecialchars($user['email'] ?? '-'); ?></p>
@@ -136,6 +139,32 @@
                 </div>
             </div>
         </section>
+    </div>
+
+    <div id="nameEditModal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/70 px-4 py-8 backdrop-blur-sm transition-opacity">
+        <div class="relative w-full max-w-md rounded-3xl bg-white p-8 shadow-2xl">
+            <button id="closeNameModalButton" type="button" class="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 focus:outline-none transition">
+                ×
+            </button>
+            <div class="space-y-6">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900">Ubah Nama Akun</h3>
+                    <p class="mt-1 text-sm text-slate-500">Masukkan nama lengkap Anda yang baru.</p>
+                </div>
+                
+                <form action="<?= BASEURL; ?>/profile/updateNama" method="POST" class="space-y-6">
+                    <div>
+                        <input type="text" name="nama_baru" required value="<?= htmlspecialchars($user['nama'] ?? ''); ?>" placeholder="Nama Lengkap" 
+                               class="w-full rounded-2xl border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all">
+                    </div>
+                    
+                    <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
+                        <button type="button" id="cancelNameButton" class="rounded-full border border-slate-300 bg-white px-6 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 transition shadow-sm">Batal</button>
+                        <button type="submit" class="rounded-full bg-emerald-600 px-8 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 transition shadow-md active:scale-95">Simpan Perubahan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <div id="profilePhotoModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 px-4 py-8">
@@ -189,6 +218,29 @@
             baseUrl = baseUrl.replace('http:', 'https:');
         }
 
+        // ====== LOGIKA MODAL UBAH NAMA ======
+        const nameEditModal = document.getElementById('nameEditModal');
+        
+        document.getElementById('editNameButton').addEventListener('click', () => {
+            nameEditModal.classList.remove('hidden');
+            nameEditModal.classList.add('flex');
+        });
+
+        const closeNameModal = () => {
+            nameEditModal.classList.add('hidden');
+            nameEditModal.classList.remove('flex');
+        };
+
+        document.getElementById('closeNameModalButton').addEventListener('click', closeNameModal);
+        document.getElementById('cancelNameButton').addEventListener('click', closeNameModal);
+
+        // Tutup modal jika area gelap di luar modal nama diklik
+        nameEditModal.addEventListener('click', (e) => {
+            if (e.target === nameEditModal) closeNameModal();
+        });
+
+
+        // ====== LOGIKA MODAL FOTO (Sama seperti sebelumnya) ======
         const profilePhotoModal = document.getElementById('profilePhotoModal');
         const photoEditModal = document.getElementById('photoEditModal');
         const saveEditButton = document.getElementById('saveEditButton');
@@ -201,10 +253,7 @@
         let selectedFile = null;
         let isGifUpload = false;
         
-        const photoAspect = {
-            profil: 1, 
-            banner: 14 / 5, 
-        };
+        const photoAspect = { profil: 1, banner: 14 / 5 };
         const photoSize = {
             profil: { width: 512, height: 512 },
             banner: { width: 1400, height: 500 },
@@ -270,7 +319,6 @@
                 return;
             }
 
-            // Pengecekan window.Cropper yang lebih akurat
             if (!window.Cropper) {
                 alert('Library pemotong gambar gagal dimuat oleh browser. Coba refresh halaman ini.');
                 photoFileInput.value = '';
@@ -290,10 +338,8 @@
                     cropper = null;
                 }
                 
-                // Kosongkan container
                 imageContainer.innerHTML = '';
                 
-                // FIX 3: Buat elemen gambar secara native melalui JavaScript agar browser tahu persis kapan selesai dimuat
                 const newImg = document.createElement('img');
                 newImg.id = 'cropperImage';
                 newImg.style.display = 'block';
@@ -336,7 +382,6 @@
                     saveEditButton.textContent = 'Simpan';
                 };
 
-                // Masukkan gambar ke DOM dan isi SRC-nya
                 imageContainer.appendChild(newImg);
                 newImg.src = e.target.result;
             };

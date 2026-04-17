@@ -43,14 +43,20 @@
                 <div class="hidden md:flex items-center space-x-4">
                     <?php if(isset($_SESSION['user_nama'])) : ?>
                         <?php
-                            // FIX: Logika untuk menentukan URL foto di Header
+                            // FIX: Logika canggih untuk membaca foto baik dari Base64, URL, maupun raw BLOB Database
                             if (!empty($_SESSION['user_foto'])) {
-                                if (preg_match('/^data:image\//', $_SESSION['user_foto'])) {
-                                    $headerAvatarUrl = $_SESSION['user_foto'];
-                                } elseif (preg_match('/^(https?:\/\/|\/)/', $_SESSION['user_foto'])) {
-                                    $headerAvatarUrl = htmlspecialchars($_SESSION['user_foto']);
+                                $foto_session = $_SESSION['user_foto'];
+                                $prefix = substr($foto_session, 0, 30); // Ambil potongan awal untuk deteksi cepat
+                                
+                                if (preg_match('/^data:image\//', $prefix)) {
+                                    $headerAvatarUrl = $foto_session;
+                                } elseif (preg_match('/^(https?:\/\/|\/)/', $prefix)) {
+                                    $headerAvatarUrl = htmlspecialchars($foto_session);
+                                } elseif ($avatarInfo = @getimagesizefromstring($foto_session)) {
+                                    // Mengamankan data biner (BLOB) yang ditarik langsung dari database
+                                    $headerAvatarUrl = 'data:' . $avatarInfo['mime'] . ';base64,' . base64_encode($foto_session);
                                 } else {
-                                    $headerAvatarUrl = BASEURL . '/' . htmlspecialchars($_SESSION['user_foto']);
+                                    $headerAvatarUrl = BASEURL . '/' . htmlspecialchars($foto_session);
                                 }
                             } else {
                                 $headerAvatarUrl = "https://ui-avatars.com/api/?name=" . urlencode($_SESSION['user_nama']) . "&background=10b981&color=fff&size=512";

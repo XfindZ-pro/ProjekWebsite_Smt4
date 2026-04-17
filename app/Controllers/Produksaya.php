@@ -1,7 +1,9 @@
 <?php
 
-class Produksaya extends Controller {
-    public function index() {
+class Produksaya extends Controller
+{
+    public function index()
+    {
         if (!isset($_SESSION['user_akun_id'])) {
             header('Location: ' . BASEURL . '/login');
             exit;
@@ -12,22 +14,29 @@ class Produksaya extends Controller {
         $this->view('templates/footer');
     }
 
-    public function edit($id) {
+    public function edit($id)
+    {
         $produk = $this->model('AkunModel')->getProdukById($id);
-        // Keamanan: Pastikan hanya pemilik yang bisa mengedit
+
+        // Proteksi: Pastikan produk ada dan milik user yang login
         if (!$produk || $produk['penjual_id'] !== $_SESSION['user_akun_id']) {
             header('Location: ' . BASEURL . '/produksaya');
             exit;
         }
+
+        $data['judul'] = 'Edit Produk - Valora';
+        $data['aktif'] = 'produksaya'; // PENTING: Supaya sidebar tetap sinkron
         $data['produk'] = $produk;
-        $this->view('templates/header', ['judul' => 'Edit Produk']);
+
+        $this->view('templates/header', $data);
         $this->view('produksaya/edit', $data);
         $this->view('templates/footer');
     }
 
-    public function update() {
+    public function update()
+    {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $getBlob = function($fileKey) {
+            $getBlob = function ($fileKey) {
                 if (isset($_FILES[$fileKey]) && $_FILES[$fileKey]['error'] == 0) {
                     return file_get_contents($_FILES[$fileKey]['tmp_name']);
                 }
@@ -61,7 +70,8 @@ class Produksaya extends Controller {
         }
     }
 
-    public function hapus($id) {
+    public function hapus($id)
+    {
         if ($this->model('AkunModel')->hapusProduk($id, $_SESSION['user_akun_id'])) {
             header('Location: ' . BASEURL . '/produksaya');
             exit;
