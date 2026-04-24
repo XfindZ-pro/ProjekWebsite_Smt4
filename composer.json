@@ -1,0 +1,23 @@
+{
+    "name": "xfindz/valora",
+    "description": "Projek Website Valora MVC Native",
+    "type": "project",
+    "license": "MIT",
+    "autoload": {
+        "classmap": [
+            "app/Core",
+            "app/Controllers",
+            "app/Models",
+            "app/Libraries"
+
+        ]
+    },
+    "authors": [
+        {
+            "name": "XfindZ-pro"
+        }
+    ],
+    "require": {
+        "phpmailer/phpmailer": "^7.0"
+    }
+}

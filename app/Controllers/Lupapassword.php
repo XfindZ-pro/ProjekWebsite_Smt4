@@ -1,5 +1,9 @@
 <?php
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\SMTP;
+
 class Lupapassword extends Controller {
     public function index() {
         $data['aktif'] = 'lupapassword';
@@ -195,48 +199,33 @@ class Lupapassword extends Controller {
     }
 
     private function sendOtpWithSmtp($email, $subject, $body) {
-        $host = MAIL_HOST;
-        $port = MAIL_PORT;
-        $username = MAIL_USERNAME;
-        $password = MAIL_PASSWORD;
-        $from = MAIL_FROM;
-        $fromName = MAIL_FROM_NAME ?? 'Valora Support';
-        $transport = (defined('MAIL_SMTP_SECURE') && MAIL_SMTP_SECURE === 'ssl') ? 'ssl://' : '';
-        $remote = sprintf('%s%s:%d', $transport, $host, $port);
+        $mail = new PHPMailer(true);
 
-        $connection = stream_socket_client($remote, $errno, $errstr, 15);
-        if (!$connection) {
-            error_log("[OTP] SMTP connect failed: $errno - $errstr");
+        try {
+            // Server settings
+            $mail->isSMTP();
+            $mail->Host       = MAIL_HOST;
+            $mail->SMTPAuth   = true;
+            $mail->Username   = MAIL_USERNAME;
+            $mail->Password   = MAIL_PASSWORD;
+            $mail->SMTPSecure = (MAIL_SMTP_SECURE === 'ssl') ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = MAIL_PORT;
+
+            // Recipients
+            $mail->setFrom(MAIL_FROM, MAIL_FROM_NAME ?? 'Valora Support');
+            $mail->addAddress($email);
+
+            // Content
+            $mail->isHTML(true);
+            $mail->Subject = $subject;
+            $mail->Body    = $body;
+
+            $mail->send();
+            return true;
+        } catch (Exception $e) {
+            error_log("[OTP] PHPMailer Error: {$mail->ErrorInfo}");
             return false;
         }
-
-        stream_set_timeout($connection, 15);
-        if (!$this->smtpRead($connection, '220')) {
-            fclose($connection);
-            return false;
-        }
-
-        $hostname = $_SERVER['SERVER_NAME'] ?? 'localhost';
-        if (!$this->smtpWrite($connection, "EHLO $hostname\r\n", '250')) { fclose($connection); return false; }
-        if (!$this->smtpWrite($connection, "AUTH LOGIN\r\n", '334')) { fclose($connection); return false; }
-        if (!$this->smtpWrite($connection, base64_encode($username) . "\r\n", '334')) { fclose($connection); return false; }
-        if (!$this->smtpWrite($connection, base64_encode($password) . "\r\n", '235')) { fclose($connection); return false; }
-        if (!$this->smtpWrite($connection, "MAIL FROM:<$username>\r\n", '250')) { fclose($connection); return false; }
-        if (!$this->smtpWrite($connection, "RCPT TO:<$email>\r\n", '250')) { fclose($connection); return false; }
-        if (!$this->smtpWrite($connection, "DATA\r\n", '354')) { fclose($connection); return false; }
-
-        $headers = "From: $fromName <$from>\r\n";
-        $headers .= "MIME-Version: 1.0\r\n";
-        $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
-        $headers .= "To: $email\r\n";
-        $headers .= "Subject: $subject\r\n";
-
-        $message = $headers . "\r\n" . $body . "\r\n.\r\n";
-        if (!$this->smtpWriteRaw($connection, $message, '250')) { fclose($connection); return false; }
-        $this->smtpWrite($connection, "QUIT\r\n", '221');
-        fclose($connection);
-
-        return true;
     }
 
     private function sendOtpWithMailFunction($email, $subject, $body) {
@@ -252,30 +241,4 @@ class Lupapassword extends Controller {
         return $result;
     }
 
-    private function smtpRead($connection, $expectedCode) {
-        $response = '';
-        while (($line = fgets($connection, 515)) !== false) {
-            $response .= $line;
-            if (isset($line[3]) && $line[3] !== '-') {
-                break;
-            }
-        }
-
-        if (substr($response, 0, 3) !== $expectedCode) {
-            error_log("[OTP] SMTP response expected {$expectedCode}, got: {$response}");
-            return false;
-        }
-
-        return true;
-    }
-
-    private function smtpWrite($connection, $command, $expectedCode) {
-        fwrite($connection, $command);
-        return $this->smtpRead($connection, $expectedCode);
-    }
-
-    private function smtpWriteRaw($connection, $data, $expectedCode) {
-        fwrite($connection, $data);
-        return $this->smtpRead($connection, $expectedCode);
-    }
 }

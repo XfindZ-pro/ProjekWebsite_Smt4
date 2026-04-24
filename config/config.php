@@ -20,9 +20,9 @@ define('DB_NAME', 'pemweb_properlyby');
 
 define('MAIL_HOST', 'smtp.gmail.com');
 define('MAIL_PORT', 465);
-define('MAIL_USERNAME', 'your-email@gmail.com');
-define('MAIL_PASSWORD', 'your-app-password');
-define('MAIL_FROM', 'your-email@gmail.com');
+define('MAIL_USERNAME', 'Xstaygtofficial@gmail.com');
+define('MAIL_PASSWORD', 'bexj swsx zqck lwyf');
+define('MAIL_FROM', 'Xstaygtofficial@gmail.com');
 define('MAIL_FROM_NAME', 'Valora Support');
 define('MAIL_SMTP_SECURE', 'ssl');
 
