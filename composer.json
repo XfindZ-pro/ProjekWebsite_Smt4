@@ -7,8 +7,7 @@
         "classmap": [
             "app/Core",
             "app/Controllers",
-            "app/Models",
-            "app/Libraries"
+            "app/Models"
 
         ]
     },
@@ -19,5 +18,8 @@
     ],
     "require": {
         "phpmailer/phpmailer": "^7.0"
+    },
+    "config": {
+        "optimize-autoloader": true
     }
 }

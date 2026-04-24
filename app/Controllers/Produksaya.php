@@ -8,7 +8,7 @@ class Produksaya extends Controller
             header('Location: ' . BASEURL . '/login');
             exit;
         }
-        $data['katalog'] = $this->model('AkunModel')->getProdukByPenjual($_SESSION['user_akun_id']);
+        $data['katalog'] = $this->model('ProdukModel')->getProdukByPenjual($_SESSION['user_akun_id']);
         $this->view('templates/header', ['aktif' => 'produksaya']);
         $this->view('produksaya/index', $data);
         $this->view('templates/footer');
@@ -16,7 +16,7 @@ class Produksaya extends Controller
 
     public function edit($id)
     {
-        $produk = $this->model('AkunModel')->getProdukById($id);
+        $produk = $this->model('ProdukModel')->getProdukById($id);
 
         // Proteksi: Pastikan produk ada dan milik user yang login
         if (!$produk || $produk['penjual_id'] !== $_SESSION['user_akun_id']) {
@@ -63,7 +63,7 @@ class Produksaya extends Controller
                 'status_produk' => isset($_POST['draft']) ? 'draft' : 'aktif'
             ];
 
-            if ($this->model('AkunModel')->updateProduk($data)) {
+            if ($this->model('ProdukModel')->updateProduk($data)) {
                 header('Location: ' . BASEURL . '/produksaya');
                 exit;
             }
@@ -72,7 +72,7 @@ class Produksaya extends Controller
 
     public function hapus($id)
     {
-        if ($this->model('AkunModel')->hapusProduk($id, $_SESSION['user_akun_id'])) {
+        if ($this->model('ProdukModel')->hapusProduk($id, $_SESSION['user_akun_id'])) {
             header('Location: ' . BASEURL . '/produksaya');
             exit;
         }

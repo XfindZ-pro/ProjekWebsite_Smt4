@@ -8,8 +8,8 @@ class Home extends Controller {
         
         // Jika pengguna sudah login, cek apakah dia punya produk
         if (isset($_SESSION['user_akun_id'])) {
-            $akunModel = $this->model('AkunModel');
-            $data['has_products'] = $akunModel->hasProducts($_SESSION['user_akun_id']);
+            $produkModel = $this->model('ProdukModel');
+            $data['has_products'] = $produkModel->hasProducts($_SESSION['user_akun_id']);
         }
         
         $this->view('templates/header', $data);

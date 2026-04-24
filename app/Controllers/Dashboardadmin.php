@@ -9,11 +9,13 @@ class Dashboardadmin extends Controller {
         }
 
         $akunModel = $this->model('AkunModel');
+        $verifikasiModel = $this->model('VerifikasiModel');
+        $produkModel = $this->model('ProdukModel');
         $data['aktif'] = 'dashboardadmin';
         
         // Menarik data antrean verifikasi
-        $data['verifikasi_list'] = $akunModel->getPendingVerifications();
-        $data['recent_submissions'] = $akunModel->getRecentVerifications(3);
+        $data['verifikasi_list'] = $verifikasiModel->getPendingVerifications();
+        $data['recent_submissions'] = $verifikasiModel->getRecentVerifications(3);
         
         // Menarik data SEMUA pengguna dan konversi format Foto
         $users = $akunModel->getAllUsers();
@@ -38,9 +40,9 @@ class Dashboardadmin extends Controller {
         
         // Memuat statistik dinamis
         $data['total_users'] = $akunModel->countUsers();
-        $data['pending_verifications'] = $akunModel->countPendingVerifications();
-        $data['product_active'] = $akunModel->countActiveProducts();
-        $data['approved_today'] = $akunModel->countApprovedToday();
+        $data['pending_verifications'] = $verifikasiModel->countPendingVerifications();
+        $data['product_active'] = $produkModel->countActiveProducts();
+        $data['approved_today'] = $verifikasiModel->countApprovedToday();
 
         $this->view('templates/header', $data);
         $this->view('dashboardadmin/index', $data);
@@ -48,14 +50,14 @@ class Dashboardadmin extends Controller {
     }
 
     public function setujui($v_id, $akun_id) {
-        if ($this->model('AkunModel')->approveVerification($v_id, $akun_id)) {
+        if ($this->model('VerifikasiModel')->approveVerification($v_id, $akun_id)) {
             header('Location: ' . BASEURL . '/dashboardadmin');
             exit;
         }
     }
 
     public function tolak($v_id, $akun_id) {
-        if ($this->model('AkunModel')->rejectVerification($v_id, $akun_id)) {
+        if ($this->model('VerifikasiModel')->rejectVerification($v_id, $akun_id)) {
             header('Location: ' . BASEURL . '/dashboardadmin');
             exit;
         }

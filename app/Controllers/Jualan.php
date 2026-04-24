@@ -59,7 +59,7 @@ class Jualan extends Controller {
                 'status_produk' => isset($_POST['draft']) ? 'draft' : 'aktif'
             ];
 
-            if ($this->model('AkunModel')->tambahProduk($dataProduk)) {
+            if ($this->model('ProdukModel')->tambahProduk($dataProduk)) {
                 header('Location: ' . BASEURL . '/caribahanbaku'); 
                 exit;
             } else {

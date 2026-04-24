@@ -2,7 +2,7 @@
 
 class Caribahanbaku extends Controller {
     public function index() {
-        $model = $this->model('AkunModel');
+        $model = $this->model('ProdukModel');
 
         // Menangkap parameter dari URL (GET)
         $filter = [

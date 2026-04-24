@@ -38,6 +38,7 @@ class Verifikasiakun extends Controller {
         }
 
         $akunModel = $this->model('AkunModel');
+        $verifikasiModel = $this->model('VerifikasiModel');
         $user = $akunModel->getAkunById($_SESSION['user_akun_id']);
 
         if ($user && $user['status_verifikasi'] === 'disetujui') {
@@ -97,9 +98,9 @@ class Verifikasiakun extends Controller {
             'nomor_telepon' => $nomor_telepon,
         ];
 
-        $success = $akunModel->ajukanVerifikasi($payload);
+        $success = $verifikasiModel->ajukanVerifikasi($payload);
         if ($success) {
-            $akunModel->updateStatusVerifikasi($_SESSION['user_akun_id'], 'menunggu');
+            $verifikasiModel->updateStatusVerifikasi($_SESSION['user_akun_id'], 'menunggu');
             header('Location: ' . BASEURL . '/verifikasiakun?message=' . rawurlencode('Pengajuan berhasil. Status akun sekarang menunggu verifikasi.') . '&type=success');
             exit;
         }

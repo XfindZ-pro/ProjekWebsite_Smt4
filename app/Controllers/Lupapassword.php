@@ -28,6 +28,7 @@ class Lupapassword extends Controller {
         }
 
         $akunModel = $this->model('AkunModel');
+        $otpModel = $this->model('OtpModel');
         $user = $akunModel->getAkunByEmail($email);
 
         if (!$user) {
@@ -35,11 +36,11 @@ class Lupapassword extends Controller {
             exit;
         }
 
-        $akunModel->expireOtpsByEmail($email);
+        $otpModel->expireOtpsByEmail($email);
         $otpCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
         $expiry = date('Y-m-d H:i:s', strtotime('+3 minutes'));
 
-        if (!$akunModel->createOtp($email, $otpCode, $expiry)) {
+        if (!$otpModel->createOtp($email, $otpCode, $expiry)) {
             header('Location: ' . BASEURL . '/lupapassword?message=' . rawurlencode('Gagal memproses permintaan. Coba lagi.') . '&type=error');
             exit;
         }
@@ -84,14 +85,15 @@ class Lupapassword extends Controller {
         }
 
         $akunModel = $this->model('AkunModel');
-        $otp = $akunModel->getActiveOtp($email, $kodeOtp);
+        $otpModel = $this->model('OtpModel');
+        $otp = $otpModel->getActiveOtp($email, $kodeOtp);
 
         if (!$otp || strtotime($otp['waktu_kadaluarsa']) < time()) {
             header('Location: ' . BASEURL . '/lupapassword/verify?email=' . rawurlencode($email) . '&message=' . rawurlencode('Kode OTP tidak valid atau sudah kadaluarsa.') . '&type=error');
             exit;
         }
 
-        $akunModel->useOtp($otp['otp_id']);
+        $otpModel->useOtp($otp['otp_id']);
         $user = $akunModel->getAkunByEmail($email);
 
         $_SESSION['password_reset_akun_id'] = $user['akun_id'];
@@ -114,6 +116,7 @@ class Lupapassword extends Controller {
         }
 
         $akunModel = $this->model('AkunModel');
+        $otpModel = $this->model('OtpModel');
         $user = $akunModel->getAkunByEmail($email);
 
         if (!$user) {
@@ -121,10 +124,10 @@ class Lupapassword extends Controller {
             exit;
         }
 
-        $akunModel->expireOtpsByEmail($email);
+        $otpModel->expireOtpsByEmail($email);
         $otpCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
         $expiry = date('Y-m-d H:i:s', strtotime('+3 minutes'));
-        $akunModel->createOtp($email, $otpCode, $expiry);
+        $otpModel->createOtp($email, $otpCode, $expiry);
 
         if ($this->sendOtpEmail($email, $otpCode)) {
             header('Location: ' . BASEURL . '/lupapassword/verify?email=' . rawurlencode($email) . '&message=' . rawurlencode('OTP baru telah dikirim ke email Anda.') . '&type=success');

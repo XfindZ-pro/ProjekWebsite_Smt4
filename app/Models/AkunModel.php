@@ -9,7 +9,6 @@ class AkunModel
         $this->db = new Database();
     }
 
-    // 1. Cek Duplikat Email
     public function cekEmail($email)
     {
         $stmt = $this->db->conn()->prepare("SELECT email FROM akun WHERE email = :email");
@@ -18,7 +17,6 @@ class AkunModel
         return $stmt->rowCount() > 0;
     }
 
-    // 2. Generate ID 
     public function generateId()
     {
         $stmt = $this->db->conn()->prepare("SELECT akun_id FROM akun ORDER BY akun_id DESC LIMIT 1");
@@ -36,7 +34,6 @@ class AkunModel
         return 'akun' . str_pad($number, 6, "0", STR_PAD_LEFT);
     }
 
-    // 3. Simpan Data Register
     public function tambahAkun($data)
     {
         $akun_id = $this->generateId();
@@ -60,7 +57,6 @@ class AkunModel
         return $stmt->execute();
     }
 
-    // 4. INI FUNGSI YANG BIKIN ERROR TADI (Pastikan ditambahkan)
     public function getAkunByEmail($email)
     {
         $stmt = $this->db->conn()->prepare("SELECT * FROM akun WHERE email = :email");
@@ -103,87 +99,6 @@ class AkunModel
         return $stmt->execute();
     }
 
-    // Fungsi untuk membuat ID Verifikasi unik (Contoh: verifikasiakun12345)
-    public function generateVerifikasiId()
-    {
-        do {
-            // Hasilkan 5 angka acak. str_pad digunakan agar tetap 5 digit meskipun angka di depan 0
-            $angka_acak = str_pad(rand(0, 99999), 5, '0', STR_PAD_LEFT);
-            $id_baru = 'verifikasiakun' . $angka_acak;
-
-            // Cek apakah ID ini sudah pernah ada di database
-            $stmt = $this->db->conn()->prepare("SELECT verifikasi_id FROM verifikasi_bisnis WHERE verifikasi_id = :id");
-            $stmt->bindParam(':id', $id_baru);
-            $stmt->execute();
-
-            // Jika rowCount() > 0, berarti ID sudah ada, maka perulangan akan diulang (membuat angka baru)
-        } while ($stmt->rowCount() > 0);
-
-        return $id_baru;
-    }
-
-    public function ajukanVerifikasi($data)
-    {
-        try {
-            // Panggil fungsi pembuat ID otomatis tanpa duplikat
-            $verifikasi_id = $this->generateVerifikasiId();
-
-            // Sisa query insert tetap menggunakan logika milikmu sebelumnya
-            // Pastikan bindParam untuk :verifikasi_id mengambil dari variabel di atas
-            $query = "INSERT INTO verifikasi_bisnis (
-                        verifikasi_id, akun_id, jenis_entitas, nama_usaha, file_ktp, file_izin_usaha, alamat_usaha, nomor_telepon
-                      ) VALUES (
-                        :verifikasi_id, :akun_id, :jenis_entitas, :nama_usaha, :file_ktp, :file_izin_usaha, :alamat_usaha, :nomor_telepon
-                      )";
-
-            $stmt = $this->db->conn()->prepare($query);
-
-            // Proses Binding Data
-            $stmt->bindParam(':verifikasi_id', $verifikasi_id);
-            $stmt->bindParam(':akun_id', $data['akun_id']);
-            $stmt->bindParam(':jenis_entitas', $data['jenis_entitas']);
-            $stmt->bindParam(':nama_usaha', $data['nama_usaha']);
-            $stmt->bindValue(':file_ktp', $data['file_ktp'], PDO::PARAM_LOB);
-            $stmt->bindValue(':file_izin_usaha', $data['file_izin_usaha'], PDO::PARAM_LOB);
-            $stmt->bindParam(':alamat_usaha', $data['alamat_usaha']);
-            $stmt->bindParam(':nomor_telepon', $data['nomor_telepon']);
-
-            return $stmt->execute();
-        } catch (PDOException $e) {
-            // Bisa digunakan untuk debugging saat error
-            error_log("Gagal ajukan verifikasi: " . $e->getMessage());
-            return false;
-        }
-    }
-
-    public function updateStatusVerifikasi($akun_id, $status)
-    {
-        $query = "UPDATE akun SET status_verifikasi = :status WHERE akun_id = :akun_id";
-        $stmt = $this->db->conn()->prepare($query);
-        $stmt->bindParam(':status', $status);
-        $stmt->bindParam(':akun_id', $akun_id);
-        return $stmt->execute();
-    }
-
-    public function setResetToken($akun_id, $token, $expiry)
-    {
-        $query = "UPDATE akun SET reset_token = :token, reset_expiry = :expiry WHERE akun_id = :akun_id";
-        $stmt = $this->db->conn()->prepare($query);
-        $stmt->bindParam(':token', $token);
-        $stmt->bindParam(':expiry', $expiry);
-        $stmt->bindParam(':akun_id', $akun_id);
-        return $stmt->execute();
-    }
-
-    public function getUserByResetToken($token)
-    {
-        $query = "SELECT * FROM akun WHERE reset_token = :token";
-        $stmt = $this->db->conn()->prepare($query);
-        $stmt->bindParam(':token', $token);
-        $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-
     public function updatePassword($akun_id, $password)
     {
         $query = "UPDATE akun SET password = :password WHERE akun_id = :akun_id";
@@ -193,55 +108,9 @@ class AkunModel
         return $stmt->execute();
     }
 
-    public function clearResetToken($akun_id)
-    {
-        $query = "UPDATE akun SET reset_token = NULL, reset_expiry = NULL WHERE akun_id = :akun_id";
-        $stmt = $this->db->conn()->prepare($query);
-        $stmt->bindParam(':akun_id', $akun_id);
-        return $stmt->execute();
-    }
-
-    public function expireOtpsByEmail($email)
-    {
-        $query = "UPDATE otp_verifikasi SET status = 'terpakai' WHERE email = :email AND status = 'aktif'";
-        $stmt = $this->db->conn()->prepare($query);
-        $stmt->bindParam(':email', $email);
-        return $stmt->execute();
-    }
-
-    public function createOtp($email, $kodeOtp, $expiry)
-    {
-        $query = "INSERT INTO otp_verifikasi (email, kode_otp, status, waktu_dibuat, waktu_kadaluarsa) VALUES (:email, :kode_otp, 'aktif', NOW(), :expiry)";
-        $stmt = $this->db->conn()->prepare($query);
-        $stmt->bindParam(':email', $email);
-        $stmt->bindParam(':kode_otp', $kodeOtp);
-        $stmt->bindParam(':expiry', $expiry);
-        return $stmt->execute();
-    }
-
-    public function getActiveOtp($email, $kodeOtp)
-    {
-        $query = "SELECT * FROM otp_verifikasi WHERE email = :email AND kode_otp = :kode_otp AND status = 'aktif'";
-        $stmt = $this->db->conn()->prepare($query);
-        $stmt->bindParam(':email', $email);
-        $stmt->bindParam(':kode_otp', $kodeOtp);
-        $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-
-    public function useOtp($otp_id)
-    {
-        $query = "UPDATE otp_verifikasi SET status = 'terpakai' WHERE otp_id = :otp_id";
-        $stmt = $this->db->conn()->prepare($query);
-        $stmt->bindParam(':otp_id', $otp_id);
-        return $stmt->execute();
-    }
-
-    // Menarik semua data pengguna dari tabel akun untuk Manajemen Pengguna
     public function getAllUsers()
     {
         try {
-            // FIX: Tambahkan foto_profil, foto_banner, dan created_at ke dalam query
             $stmt = $this->db->conn()->prepare("SELECT akun_id, nama, email, peran, status_verifikasi, foto_profil, foto_banner, created_at FROM akun ORDER BY created_at DESC");
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -250,65 +119,6 @@ class AkunModel
         }
     }
 
-    // Menghasilkan ID Produk otomatis (Contoh: PRD000001)
-    public function generateProdukId()
-    {
-        $stmt = $this->db->conn()->prepare("SELECT produk_id FROM katalog ORDER BY produk_id DESC LIMIT 1");
-        $stmt->execute();
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($row && preg_match('/^(PRD)(\d+)$/', $row['produk_id'], $matches)) {
-            $number = (int) $matches[2] + 1;
-        } else {
-            $number = 1;
-        }
-
-        return 'PRD' . str_pad($number, 6, "0", STR_PAD_LEFT);
-    }
-
-    // Menyimpan produk baru ke database
-    public function tambahProduk($data)
-    {
-        $produk_id = $this->generateProdukId();
-
-        $query = "INSERT INTO katalog (
-                    produk_id, penjual_id, nama_produk, kategori_limbah, berat_tersedia, 
-                    harga_per_kg, min_order, lokasi_pickup, kondisi_harga, deskripsi, 
-                    kondisi_fisik, metode_pengemasan, foto_1, foto_2, foto_3, 
-                    dokumen_pendukung, status_produk
-                  ) VALUES (
-                    :produk_id, :penjual_id, :nama_produk, :kategori_limbah, :berat_tersedia, 
-                    :harga_per_kg, :min_order, :lokasi_pickup, :kondisi_harga, :deskripsi, 
-                    :kondisi_fisik, :metode_pengemasan, :foto_1, :foto_2, :foto_3, 
-                    :dokumen_pendukung, :status_produk
-                  )";
-
-        $stmt = $this->db->conn()->prepare($query);
-        $stmt->bindParam(':produk_id', $produk_id);
-        $stmt->bindParam(':penjual_id', $data['penjual_id']);
-        $stmt->bindParam(':nama_produk', $data['nama_produk']);
-        $stmt->bindParam(':kategori_limbah', $data['kategori_limbah']);
-        $stmt->bindParam(':berat_tersedia', $data['berat_tersedia']);
-        $stmt->bindParam(':harga_per_kg', $data['harga_per_kg']);
-        $stmt->bindParam(':min_order', $data['min_order']);
-        $stmt->bindParam(':lokasi_pickup', $data['lokasi_pickup']);
-        $stmt->bindParam(':kondisi_harga', $data['kondisi_harga']);
-        $stmt->bindParam(':deskripsi', $data['deskripsi']);
-        $stmt->bindParam(':kondisi_fisik', $data['kondisi_fisik']);
-        $stmt->bindParam(':metode_pengemasan', $data['metode_pengemasan']);
-
-        // Bind Gambar sebagai LOB (Large Object)
-        $stmt->bindValue(':foto_1', $data['foto_1'], PDO::PARAM_LOB);
-        $stmt->bindValue(':foto_2', $data['foto_2'], PDO::PARAM_LOB);
-        $stmt->bindValue(':foto_3', $data['foto_3'], PDO::PARAM_LOB);
-        $stmt->bindValue(':dokumen_pendukung', $data['dokumen_pendukung'], PDO::PARAM_LOB);
-
-        $stmt->bindParam(':status_produk', $data['status_produk']);
-
-        return $stmt->execute();
-    }
-
-    // 1. Menghitung total semua pengguna (Semua role)
     public function countUsers()
     {
         try {
@@ -321,308 +131,6 @@ class AkunModel
         }
     }
 
-    // 3. Menghitung total produk aktif di tabel katalog
-    public function countActiveProducts()
-    {
-        try {
-            $stmt = $this->db->conn()->prepare("SELECT COUNT(*) AS total FROM katalog");
-            $stmt->execute();
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            return $result['total'] ?? 0;
-        } catch (Exception $e) {
-            // Jika tabel katalog belum dibuat di database, akan mengembalikan 0 tanpa membuat halaman error
-            return 0;
-        }
-    }
-
-    // 4. Menghitung verifikasi yang disetujui pada hari ini
-    public function countApprovedToday()
-    {
-        try {
-            // Memanfaatkan fungsi CURDATE() dari MySQL untuk mengecek update hari ini
-            $stmt = $this->db->conn()->prepare("SELECT COUNT(*) AS total FROM akun WHERE status_verifikasi = 'disetujui' AND DATE(updated_at) = CURDATE()");
-            $stmt->execute();
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            return $result['total'] ?? 0;
-        } catch (Exception $e) {
-            return 0;
-        }
-    }
-
-    public function countPendingVerifications()
-    {
-        try {
-            $stmt = $this->db->conn()->prepare("SELECT COUNT(*) AS total FROM akun WHERE status_verifikasi = 'menunggu'");
-            $stmt->execute();
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            return $result['total'] ?? 0;
-        } catch (Exception $e) {
-            return 0;
-        }
-    }
-
-    public function countAllVerifications()
-    {
-        try {
-            $stmt = $this->db->conn()->prepare("SELECT COUNT(*) AS total FROM verifikasi_bisnis");
-            $stmt->execute();
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            return $result['total'] ?? 0;
-        } catch (Exception $e) {
-            return 0;
-        }
-    }
-
-    public function getRecentVerifications($limit = 3)
-    {
-        try {
-            $query = "SELECT v.nama_usaha, a.nama AS penjual, v.jenis_entitas FROM verifikasi_bisnis v JOIN akun a ON v.akun_id = a.akun_id ORDER BY v.verifikasi_id DESC LIMIT :limit";
-            $stmt = $this->db->conn()->prepare($query);
-            $stmt->bindValue(':limit', (int) $limit, PDO::PARAM_INT);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (Exception $e) {
-            return [];
-        }
-    }
-
-    // Ambil semua daftar pengajuan verifikasi yang masuk
-    public function getPendingVerifications()
-    {
-        try {
-            $query = "SELECT v.*, a.nama as nama_user, a.email 
-                      FROM verifikasi_bisnis v 
-                      JOIN akun a ON v.akun_id = a.akun_id 
-                      ORDER BY v.tanggal_pengajuan DESC";
-
-            $stmt = $this->db->conn()->prepare($query);
-            $stmt->execute();
-
-            // Gunakan fetchAll(PDO::FETCH_ASSOC) untuk mengambil banyak baris data
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (Exception $e) {
-            return [];
-        }
-    }
-
-    // Logika Persetujuan (Hapus data verifikasi & Update status akun)
-    public function approveVerification($verifikasi_id, $akun_id)
-    {
-        try {
-            // 1. Update status di tabel akun
-            $query1 = "UPDATE akun SET status_verifikasi = 'disetujui' WHERE akun_id = :akun_id";
-            $stmt1 = $this->db->conn()->prepare($query1);
-            $stmt1->bindParam(':akun_id', $akun_id);
-            $stmt1->execute();
-
-            // 2. Hapus data dari tabel verifikasi_bisnis (agar memori LONGBLOB tidak bengkak)
-            $query2 = "DELETE FROM verifikasi_bisnis WHERE verifikasi_id = :v_id";
-            $stmt2 = $this->db->conn()->prepare($query2);
-            $stmt2->bindParam(':v_id', $verifikasi_id);
-            $stmt2->execute();
-
-            return true;
-        } catch (Exception $e) {
-            return false;
-        }
-    }
-
-    // Logika Penolakan (Hapus data verifikasi & Set status ditolak)
-    public function rejectVerification($verifikasi_id, $akun_id)
-    {
-        try {
-            // 1. Set status ditolak di tabel akun
-            $query1 = "UPDATE akun SET status_verifikasi = 'ditolak' WHERE akun_id = :akun_id";
-            $stmt1 = $this->db->conn()->prepare($query1);
-            $stmt1->bindParam(':akun_id', $akun_id);
-            $stmt1->execute();
-
-            // 2. Hapus data pengajuan
-            $query2 = "DELETE FROM verifikasi_bisnis WHERE verifikasi_id = :v_id";
-            $stmt2 = $this->db->conn()->prepare($query2);
-            $stmt2->bindParam(':v_id', $verifikasi_id);
-            $stmt2->execute();
-
-            return true;
-        } catch (Exception $e) {
-            return false;
-        }
-    }
-
-    // Menarik semua produk spesifik milik seorang penjual
-    public function getProdukByPenjual($akun_id)
-    {
-        try {
-            $stmt = $this->db->conn()->prepare("SELECT * FROM katalog WHERE penjual_id = :akun_id ORDER BY created_at DESC");
-            $stmt->bindParam(':akun_id', $akun_id);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (Exception $e) {
-            return [];
-        }
-    }
-
-    // Mengecek apakah penjual memiliki minimal 1 produk di katalog
-    public function hasProducts($akun_id)
-    {
-        try {
-            $stmt = $this->db->conn()->prepare("SELECT COUNT(*) AS total FROM katalog WHERE penjual_id = :akun_id");
-            $stmt->bindParam(':akun_id', $akun_id);
-            $stmt->execute();
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            return ($result['total'] > 0);
-        } catch (Exception $e) {
-            return false;
-        }
-    }
-
-    // Menarik satu produk berdasarkan ID-nya
-    public function getProdukById($id)
-    {
-        try {
-            $stmt = $this->db->conn()->prepare("SELECT * FROM katalog WHERE produk_id = :id");
-            $stmt->bindParam(':id', $id);
-            $stmt->execute();
-            return $stmt->fetch(PDO::FETCH_ASSOC);
-        } catch (Exception $e) {
-            return null;
-        }
-    }
-
-    // Memperbarui data produk yang sudah ada
-    public function updateProduk($data)
-    {
-        try {
-            // Query dinamis untuk menangani apakah foto diperbarui atau tidak
-            $query = "UPDATE katalog SET 
-                        nama_produk = :nama_produk, 
-                        kategori_limbah = :kategori_limbah, 
-                        berat_tersedia = :berat_tersedia, 
-                        harga_per_kg = :harga_per_kg, 
-                        min_order = :min_order, 
-                        lokasi_pickup = :lokasi_pickup, 
-                        kondisi_harga = :kondisi_harga, 
-                        deskripsi = :deskripsi, 
-                        kondisi_fisik = :kondisi_fisik, 
-                        metode_pengemasan = :metode_pengemasan,
-                        status_produk = :status_produk";
-
-            // Tambahkan kolom foto ke query hanya jika ada file baru diunggah
-            if ($data['foto_1'] !== null)
-                $query .= ", foto_1 = :foto_1";
-            if ($data['foto_2'] !== null)
-                $query .= ", foto_2 = :foto_2";
-            if ($data['foto_3'] !== null)
-                $query .= ", foto_3 = :foto_3";
-            if ($data['dokumen_pendukung'] !== null)
-                $query .= ", dokumen_pendukung = :dokumen_pendukung";
-
-            $query .= " WHERE produk_id = :produk_id AND penjual_id = :penjual_id";
-
-            $stmt = $this->db->conn()->prepare($query);
-
-            // Bind parameter dasar
-            $stmt->bindParam(':produk_id', $data['produk_id']);
-            $stmt->bindParam(':penjual_id', $data['penjual_id']);
-            $stmt->bindParam(':nama_produk', $data['nama_produk']);
-            $stmt->bindParam(':kategori_limbah', $data['kategori_limbah']);
-            $stmt->bindParam(':berat_tersedia', $data['berat_tersedia']);
-            $stmt->bindParam(':harga_per_kg', $data['harga_per_kg']);
-            $stmt->bindParam(':min_order', $data['min_order']);
-            $stmt->bindParam(':lokasi_pickup', $data['lokasi_pickup']);
-            $stmt->bindParam(':kondisi_harga', $data['kondisi_harga']);
-            $stmt->bindParam(':deskripsi', $data['deskripsi']);
-            $stmt->bindParam(':kondisi_fisik', $data['kondisi_fisik']);
-            $stmt->bindParam(':metode_pengemasan', $data['metode_pengemasan']);
-            $stmt->bindParam(':status_produk', $data['status_produk']);
-
-            // Bind foto hanya jika ada data baru
-            if ($data['foto_1'] !== null)
-                $stmt->bindValue(':foto_1', $data['foto_1'], PDO::PARAM_LOB);
-            if ($data['foto_2'] !== null)
-                $stmt->bindValue(':foto_2', $data['foto_2'], PDO::PARAM_LOB);
-            if ($data['foto_3'] !== null)
-                $stmt->bindValue(':foto_3', $data['foto_3'], PDO::PARAM_LOB);
-            if ($data['dokumen_pendukung'] !== null)
-                $stmt->bindValue(':dokumen_pendukung', $data['dokumen_pendukung'], PDO::PARAM_LOB);
-
-            return $stmt->execute();
-        } catch (Exception $e) {
-            return false;
-        }
-    }
-
-    // Menghapus produk dari katalog
-    public function hapusProduk($produk_id, $penjual_id)
-    {
-        try {
-            $stmt = $this->db->conn()->prepare("DELETE FROM katalog WHERE produk_id = :p_id AND penjual_id = :u_id");
-            $stmt->bindParam(':p_id', $produk_id);
-            $stmt->bindParam(':u_id', $penjual_id);
-            return $stmt->execute();
-        } catch (Exception $e) {
-            return false;
-        }
-    }
-
-    // Menarik data katalog dengan fitur Filter, Search, dan Sorting
-    public function getKatalogFilter($filter = [])
-    {
-        try {
-            // FIX ERROR: Ambil koneksi dan pastikan tidak bernilai null sebelum melakukan query
-            $conn = $this->db->conn();
-            if (!$conn) {
-                return []; // Jika gagal terhubung ke database, kembalikan array kosong agar halaman tetap bisa dimuat
-            }
-
-            $query = "SELECT * FROM katalog WHERE status_produk = 'aktif'";
-            $params = [];
-
-            // 1. Filter Pencarian (Search)
-            if (!empty($filter['keyword'])) {
-                $query .= " AND (nama_produk LIKE :keyword OR deskripsi LIKE :keyword)";
-                $params[':keyword'] = '%' . $filter['keyword'] . '%';
-            }
-
-            // 2. Filter Kategori
-            if (!empty($filter['kategori']) && $filter['kategori'] !== 'semua') {
-                $query .= " AND kategori_limbah = :kategori";
-                $params[':kategori'] = $filter['kategori'];
-            }
-
-            // 3. Filter Lokasi
-            if (!empty($filter['lokasi'])) {
-                $query .= " AND lokasi_pickup = :lokasi";
-                $params[':lokasi'] = $filter['lokasi'];
-            }
-
-            // 4. Sorting (Pengurutan)
-            $sort = $filter['sort'] ?? 'terbaru';
-            switch ($sort) {
-                case 'harga_min':
-                    $query .= " ORDER BY harga_per_kg ASC";
-                    break;
-                case 'harga_max':
-                    $query .= " ORDER BY harga_per_kg DESC";
-                    break;
-                default:
-                    $query .= " ORDER BY created_at DESC";
-                    break;
-            }
-
-            $stmt = $conn->prepare($query);
-            foreach ($params as $key => $val) {
-                $stmt->bindValue($key, $val);
-            }
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            // Menangkap exception maupun error fatal (Throwable ada di PHP 7+)
-        } catch (Throwable $e) {
-            return [];
-        }
-    }
-
     public function updateNama($akun_id, $nama_baru)
     {
         $query = "UPDATE akun SET nama = :nama WHERE akun_id = :akun_id";
@@ -631,6 +139,4 @@ class AkunModel
         $stmt->bindParam(':akun_id', $akun_id);
         return $stmt->execute();
     }
-
-
 }
