@@ -11,7 +11,10 @@ class ProdukModel
 
     public function generateProdukId()
     {
-        $stmt = $this->db->conn()->prepare("SELECT produk_id FROM katalog ORDER BY produk_id DESC LIMIT 1");
+        $conn = $this->db->conn();
+        if (!$conn) return 'PRD000001';
+
+        $stmt = $conn->prepare("SELECT produk_id FROM katalog ORDER BY produk_id DESC LIMIT 1");
         $stmt->execute();
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -40,7 +43,10 @@ class ProdukModel
                     :dokumen_pendukung, :status_produk
                   )";
 
-        $stmt = $this->db->conn()->prepare($query);
+        $conn = $this->db->conn();
+        if (!$conn) return false;
+
+        $stmt = $conn->prepare($query);
         $stmt->bindParam(':produk_id', $produk_id);
         $stmt->bindParam(':penjual_id', $data['penjual_id']);
         $stmt->bindParam(':nama_produk', $data['nama_produk']);
@@ -65,11 +71,14 @@ class ProdukModel
     public function countActiveProducts()
     {
         try {
-            $stmt = $this->db->conn()->prepare("SELECT COUNT(*) AS total FROM katalog");
+            $conn = $this->db->conn();
+            if (!$conn) return 0;
+
+            $stmt = $conn->prepare("SELECT COUNT(*) AS total FROM katalog");
             $stmt->execute();
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             return $result['total'] ?? 0;
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return 0;
         }
     }
@@ -77,11 +86,14 @@ class ProdukModel
     public function getProdukByPenjual($akun_id)
     {
         try {
-            $stmt = $this->db->conn()->prepare("SELECT * FROM katalog WHERE penjual_id = :akun_id ORDER BY created_at DESC");
+            $conn = $this->db->conn();
+            if (!$conn) return [];
+
+            $stmt = $conn->prepare("SELECT * FROM katalog WHERE penjual_id = :akun_id ORDER BY created_at DESC");
             $stmt->bindParam(':akun_id', $akun_id);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return [];
         }
     }
@@ -89,12 +101,15 @@ class ProdukModel
     public function hasProducts($akun_id)
     {
         try {
-            $stmt = $this->db->conn()->prepare("SELECT COUNT(*) AS total FROM katalog WHERE penjual_id = :akun_id");
+            $conn = $this->db->conn();
+            if (!$conn) return false;
+
+            $stmt = $conn->prepare("SELECT COUNT(*) AS total FROM katalog WHERE penjual_id = :akun_id");
             $stmt->bindParam(':akun_id', $akun_id);
             $stmt->execute();
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             return ($result['total'] > 0);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return false;
         }
     }
@@ -102,11 +117,14 @@ class ProdukModel
     public function getProdukById($id)
     {
         try {
-            $stmt = $this->db->conn()->prepare("SELECT * FROM katalog WHERE produk_id = :id");
+            $conn = $this->db->conn();
+            if (!$conn) return null;
+
+            $stmt = $conn->prepare("SELECT * FROM katalog WHERE produk_id = :id");
             $stmt->bindParam(':id', $id);
             $stmt->execute();
             return $stmt->fetch(PDO::FETCH_ASSOC);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return null;
         }
     }
@@ -134,7 +152,10 @@ class ProdukModel
 
             $query .= " WHERE produk_id = :produk_id AND penjual_id = :penjual_id";
 
-            $stmt = $this->db->conn()->prepare($query);
+            $conn = $this->db->conn();
+            if (!$conn) return false;
+
+            $stmt = $conn->prepare($query);
             $stmt->bindParam(':produk_id', $data['produk_id']);
             $stmt->bindParam(':penjual_id', $data['penjual_id']);
             $stmt->bindParam(':nama_produk', $data['nama_produk']);
@@ -155,7 +176,7 @@ class ProdukModel
             if ($data['dokumen_pendukung'] !== null) $stmt->bindValue(':dokumen_pendukung', $data['dokumen_pendukung'], PDO::PARAM_LOB);
 
             return $stmt->execute();
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return false;
         }
     }
@@ -163,11 +184,14 @@ class ProdukModel
     public function hapusProduk($produk_id, $penjual_id)
     {
         try {
-            $stmt = $this->db->conn()->prepare("DELETE FROM katalog WHERE produk_id = :p_id AND penjual_id = :u_id");
+            $conn = $this->db->conn();
+            if (!$conn) return false;
+
+            $stmt = $conn->prepare("DELETE FROM katalog WHERE produk_id = :p_id AND penjual_id = :u_id");
             $stmt->bindParam(':p_id', $produk_id);
             $stmt->bindParam(':u_id', $penjual_id);
             return $stmt->execute();
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return false;
         }
     }
