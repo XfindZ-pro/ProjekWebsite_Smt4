@@ -4,10 +4,12 @@
 $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://";
 
 // 2. Ambil nama host/domain secara otomatis (akan berisi 'localhost' jika di lokal, atau 'namadomain.com' jika di hosting)
-$host = $_SERVER['HTTP_HOST'];
+$host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
 
 // 3. Gabungkan menjadi BASEURL yang dinamis
-define('BASEURL', $protocol . $host);
+if (!defined('BASEURL')) {
+    define('BASEURL', $protocol . $host);
+}
 
 // Pengaturan Database
 // Isi nilai berikut dengan data MySQL dari provider hosting gratis seperti filess.io.

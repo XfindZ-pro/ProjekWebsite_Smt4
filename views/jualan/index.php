@@ -12,6 +12,7 @@
         </div>
 
         <form action="<?= BASEURL; ?>/jualan/proses" method="POST" enctype="multipart/form-data" class="space-y-8">
+            <?= csrf_field(); ?>
             
             <div id="section-step1" class="space-y-6 animate-fade-in-up">
                 <div class="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">

@@ -153,6 +153,7 @@
                 </div>
                 
                 <form action="<?= BASEURL; ?>/profile/updateNama" method="POST" class="space-y-6">
+                    <?= csrf_field(); ?>
                     <div>
                         <input type="text" name="nama_baru" required value="<?= htmlspecialchars($user['nama'] ?? ''); ?>" placeholder="Nama Lengkap" 
                                class="w-full rounded-2xl border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all">

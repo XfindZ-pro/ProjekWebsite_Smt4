@@ -13,6 +13,7 @@
         <?php endif; ?>
 
         <form action="<?= BASEURL; ?>/lupapassword/submitOtp" method="post" class="rounded-[32px] border border-slate-200 bg-white shadow-sm p-8">
+            <?= csrf_field(); ?>
             <input type="hidden" name="email" value="<?= htmlspecialchars($email); ?>" />
             <div class="space-y-6">
                 <div>
@@ -28,6 +29,7 @@
 
         <div class="mt-6 text-center space-y-4">
             <form action="<?= BASEURL; ?>/lupapassword/resendOtp" method="post" class="inline-flex justify-center">
+                <?= csrf_field(); ?>
                 <input type="hidden" name="email" value="<?= htmlspecialchars($email); ?>" />
                 <button type="submit" class="rounded-full border border-emerald-600 px-6 py-3 text-emerald-600 bg-white hover:bg-emerald-50 transition">Kirim ulang OTP</button>
             </form>

@@ -12,6 +12,7 @@
         </div>
 
         <form action="<?= BASEURL; ?>/produksaya/update" method="POST" enctype="multipart/form-data">
+            <?= csrf_field(); ?>
             <input type="hidden" name="produk_id" value="<?= $data['produk']['produk_id']; ?>">
             
             <div class="space-y-6">

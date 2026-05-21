@@ -8,6 +8,7 @@
         </div>
         
         <form class="mt-8 space-y-5" action="<?= BASEURL; ?>/register/proses" method="POST">
+            <?= csrf_field(); ?>
             
             <div>
                 <label for="nama" class="block text-sm font-medium text-slate-700">Nama Lengkap / Nama Bisnis</label>

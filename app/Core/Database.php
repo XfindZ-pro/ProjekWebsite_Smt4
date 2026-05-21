@@ -1,38 +1,43 @@
 <?php
 
-class Database {
+namespace App\Core;
+
+use PDO;
+use PDOException;
+
+class Database
+{
     private $host = DB_HOST;
+    private $port = DB_PORT;
     private $user = DB_USER;
     private $pass = DB_PASS;
     private $db_name = DB_NAME;
 
-    private $dbh; // Database Handler
-    private $stmt; // Statement
-    public $isConnected = false; // Variabel untuk menyimpan status koneksi
+    private $dbh;
+    private $error;
+    public $isConnected = false;
 
-    public function __construct() {
-        // Data Source Name (DSN)
-        $dsn = 'mysql:host=' . $this->host . ';port=' . DB_PORT . ';dbname=' . $this->db_name . ';charset=utf8';
+    public function __construct()
+    {
+        // Set DSN
+        $dsn = 'mysql:host=' . $this->host . ';port=' . $this->port . ';dbname=' . $this->db_name;
+        $options = array(
+            PDO::ATTR_PERSISTENT => true,
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+        );
 
-        // Optimasi PDO
-        $option = [
-            PDO::ATTR_PERSISTENT => true, // Menjaga koneksi tetap terbuka (hemat resource)
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION // Mode error exception
-        ];
-
+        // Create PDO instance
         try {
-            $this->dbh = new PDO($dsn, $this->user, $this->pass, $option);
-            $this->isConnected = true; // Jika sukses, set true
-        } catch(PDOException $e) {
-            $this->isConnected = false; // Jika gagal (database belum ada/salah password), set false
-            // Kita tidak menggunakan die() di sini agar website tetap bisa dimuat untuk menampilkan error visual
+            $this->dbh = new PDO($dsn, $this->user, $this->pass, $options);
+            $this->isConnected = true;
+        } catch (PDOException $e) {
+            $this->error = $e->getMessage();
+            $this->isConnected = false;
         }
     }
 
-    // Tambahkan fungsi ini untuk memberikan akses koneksi PDO ke Model
-    public function conn() {
+    public function conn()
+    {
         return $this->dbh;
     }
-
-    // Nanti di bawah sini kita bisa tambahkan fungsi query(), bind(), dan execute() untuk CRUD data
 }

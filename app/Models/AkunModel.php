@@ -101,9 +101,10 @@ class AkunModel
 
     public function updatePassword($akun_id, $password)
     {
+        $password_hash = password_hash($password, PASSWORD_DEFAULT);
         $query = "UPDATE akun SET password = :password WHERE akun_id = :akun_id";
         $stmt = $this->db->conn()->prepare($query);
-        $stmt->bindParam(':password', $password);
+        $stmt->bindParam(':password', $password_hash);
         $stmt->bindParam(':akun_id', $akun_id);
         return $stmt->execute();
     }

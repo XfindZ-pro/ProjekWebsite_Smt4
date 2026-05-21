@@ -59,6 +59,7 @@
             </div>
         <?php else : ?>
             <form action="<?= BASEURL; ?>/verifikasiakun/submit" method="post" enctype="multipart/form-data" class="rounded-[32px] border border-slate-200 bg-white shadow-sm p-8 mb-10">
+                <?= csrf_field(); ?>
                 <div class="grid gap-6">
                     <div class="grid gap-4 sm:grid-cols-2">
                         <div>

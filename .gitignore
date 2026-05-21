@@ -1,5 +1,5 @@
 # Mengabaikan folder dependency (jika nanti pakai Composer atau NPM)
-vendor/
+# vendor/
 node_modules/
 
 # Mengabaikan konfigurasi editor/OS

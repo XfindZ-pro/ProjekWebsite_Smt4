@@ -1,9 +1,33 @@
 <?php
-// Nyalakan session untuk menyimpan status login
-if (!session_id()) {
+
+// Start native PHP session for legacy code compatibility
+if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once __DIR__ . '/../app/init.php';
+// Define base constants for legacy code compatibility
+if (!defined('BASEURL')) {
+    $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://";
+    $host = $_SERVER['HTTP_HOST'];
+    define('BASEURL', $protocol . $host);
+}
 
-$app = new App();
+// Bootstrap Composer autoloader
+require __DIR__ . '/../vendor/autoload.php';
+
+// Bootstrap Laravel Application
+$app = require_once __DIR__ . '/../bootstrap/app.php';
+
+// Get Laravel app instance
+$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
+
+// Handle request
+$response = $kernel->handle(
+    $request = Illuminate\Http\Request::capture()
+);
+
+// Send response
+$response->send();
+
+// Terminate the request
+$kernel->terminate($request, $response);
