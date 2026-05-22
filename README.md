@@ -17,83 +17,106 @@
 
 ## 📖 Tentang Valora
 
-**Valora** adalah platform marketplace inovatif yang dirancang khusus untuk memfasilitasi transaksi **sisa produksi (industrial waste)** dan **bahan baku industri**. Aplikasi ini menghubungkan pemilik pabrik atau usaha yang memiliki limbah produksi layak pakai dengan pelaku industri lain yang membutuhkan bahan baku dengan harga lebih ekonomis.
+**Valora** adalah marketplace berbasis web untuk mempertemukan pemilik sisa produksi industri dengan pelaku usaha yang membutuhkan bahan baku. Aplikasi ini membantu memaksimalkan ekonomi sirkular dengan menyediakan platform jual-beli bahan baku industri dan sisa produksi secara aman.
 
-Tujuan utama Valora adalah mendukung ekonomi sirkular dengan mengurangi limbah industri sekaligus menciptakan peluang ekonomi baru melalui pengelolaan sisa produksi yang lebih terorganisir.
+Aplikasi ini mendukung alur bisnis berikut:
+- Pengguna mendaftar dan login untuk akses penuh.
+- Pengguna yang ingin berjualan harus mengajukan verifikasi akun dengan dokumen usaha.
+- Setelah diverifikasi oleh admin, penjual dapat memasukkan, mengelola, dan menampilkan produk di katalog.
+- Pembeli dapat mencari bahan baku sesuai kategori, lokasi pickup, dan harga.
+- Admin mengelola proses verifikasi dan memantau data platform.
+
+---
+
+## 🚦 Alur Bisnis Utama
+
+1. Pengguna baru mendaftar melalui halaman `Register`.
+2. Setelah login, pengguna dapat mengajukan `Verifikasi Akun` dengan mengunggah KTP dan izin usaha.
+3. Admin meninjau pengajuan verifikasi melalui `Dashboard Admin`.
+4. Jika disetujui, pengguna dapat mengakses halaman `Jualan` untuk tambah produk.
+5. Produk yang aktif akan tampil di `Katalog` dan `Cari Bahan Baku`.
+6. Penjual dapat mengelola produk sendiri di `Produksaya` (edit, hapus, ubah status draft/aktif).
+7. Jika lupa password, pengguna dapat reset melalui OTP email di halaman `Lupa Password`.
 
 ---
 
 ## ✨ Fitur Unggulan
 
-Aplikasi ini dibangun dengan fokus pada keamanan dan kemudahan penggunaan:
+### 👤 Akun & Autentikasi
+- Register dan login pengguna.
+- Reset password menggunakan OTP yang dikirim ke email.
+- Profil pengguna dengan pengaturan informasi dan tampilan.
 
-### 👤 Manajemen Pengguna & Keamanan
-- **Sistem Autentikasi**: Login dan Register yang aman.
-- **Reset Password via OTP**: Keamanan ekstra menggunakan kode OTP yang dikirim langsung ke email pengguna menggunakan **PHPMailer**.
-- **Profil Dinamis**: Pengguna dapat mengelola foto profil, foto banner, dan informasi identitas mereka.
+### 🏭 Verifikasi Penjual
+- Penjual wajib mengajukan verifikasi dengan KTP dan izin usaha.
+- Status verifikasi: `menunggu`, `disetujui`, atau `ditolak`.
+- Akun penjual hanya bisa berjualan setelah verifikasi disetujui.
 
-### 🏭 Verifikasi Bisnis (KYB)
-- **Sistem Pengajuan Verifikasi**: Penjual wajib mengunggah dokumen KTP dan Izin Usaha untuk menjamin validitas bisnis.
-- **Validasi Admin**: Admin memiliki otoritas penuh untuk menyetujui atau menolak pengajuan verifikasi berdasarkan dokumen yang dikirim.
+### 📦 Manajemen Produk
+- Penjual dapat menambah produk baru melalui halaman `Jualan`.
+- Mendukung unggah sampai 3 foto produk dan dokumen pendukung.
+- Produk dapat disimpan sebagai `draft` atau ditayangkan sebagai `aktif`.
+- Ubah dan hapus produk lewat halaman `Produksaya`.
 
-### 📦 Manajemen Katalog Produk
-- **Dashboard Penjual**: Kelola sisa produksi Anda (Tambah, Edit, Hapus) dengan dukungan hingga 3 foto produk dan dokumen pendukung.
-- **Smart Catalog**: Fitur pencarian produk berdasarkan kata kunci, filter kategori limbah, lokasi pickup, dan pengurutan harga.
+### 🔎 Pencarian Bahan Baku
+- Halaman `Cari Bahan Baku` untuk mencari produk berdasarkan kata kunci.
+- Filter kategori limbah, lokasi pickup, dan urutan harga.
+- Menampilkan semua produk aktif yang tersedia di katalog.
 
-### 📊 Admin Control Center
-- **Statistik Real-time**: Monitor total pengguna, produk aktif, dan antrean verifikasi.
-- **Manajemen User**: Pantau seluruh basis pengguna platform dalam satu tampilan.
+### 🧑‍💼 Admin Dashboard
+- Admin melihat ringkasan pengguna, produk, dan verifikasi.
+- Admin menyetujui atau menolak pengajuan verifikasi akun.
 
 ---
 
 ## 🛠️ Tech Stack
 
-Dibuat dengan teknologi modern dan struktur yang terorganisir:
+Dibangun menggunakan teknologi native dengan struktur MVC:
 
-- **Language**: PHP 8.x (Native)
-- **Database**: MySQL (PDO Connection untuk keamanan dari SQL Injection)
-- **Pattern**: **MVC (Model-View-Controller)** - Arsitektur terpisah untuk logika, data, dan tampilan.
-- **Dependency Manager**: **Composer** (Digunakan untuk Autoloading dan Manajemen Library).
-- **Email Service**: **PHPMailer** (Terintegrasi dengan SMTP Gmail untuk pengiriman OTP).
-- **Frontend**: Vanilla HTML5, CSS3 (Modern UI), dan JavaScript.
+- **PHP 8.x**
+- **MySQL 8.x**
+- **Composer** untuk autoloading dan library management
+- **PHPMailer** untuk OTP email
+- **Vanilla HTML, CSS, JavaScript** untuk tampilan frontend
+- **Pattern**: MVC native dengan controller, model, dan view terpisah
 
 ---
 
-## 🗂️ Struktur Folder (Clean Architecture)
+## 🗂️ Struktur Folder
 
 ```
 Valora/
 ├── app/
-│   ├── Controllers/    # Logika alur aplikasi
-│   ├── Core/           # Inti framework (Router & Base Class)
-│   ├── Models/         # Manajemen data (Akun, Produk, OTP, Verifikasi)
+│   ├── Controllers/    # Logika aplikasi dan alur rute
+│   ├── Core/           # Inti framework: router, controller base, request
+│   ├── Models/         # Model data: Akun, Produk, Otp, Verifikasi
 │   └── init.php        # Inisialisasi aplikasi
-├── config/             # Konfigurasi Database & SMTP
-├── public/             # Entry point & Assets (CSS, JS, Images)
-├── vendor/             # Library pihak ketiga (Composer)
-└── views/              # Template tampilan (UI)
+├── config/             # Pengaturan database & SMTP
+├── public/             # Entry point aplikasi dan aset publik
+├── routes/             # Definisi rute web
+├── vendor/             # Library pihak ketiga via Composer
+└── views/              # Template dan halaman frontend
 ```
 
 ---
 
 ## 🚀 Cara Instalasi
 
-1. **Clone Repository**
+1. **Clone repository**
    ```bash
    git clone https://github.com/XfindZ-pro/ProjekWebsite_Smt4.git
    ```
 
-2. **Install Dependencies**
-   Pastikan Anda sudah menginstal Composer, lalu jalankan:
+2. **Install dependencies**
    ```bash
    composer install
    ```
 
-3. **Konfigurasi Database**
-   Sesuaikan pengaturan di `config/config.php` dengan database lokal Anda.
+3. **Konfigurasi database**
+   Sesuaikan `config/config.php` dengan pengaturan MySQL lokal.
 
-4. **Aktifkan SMTP (Optional untuk OTP)**
-   Dapatkan **App Password** dari Google Account Anda dan masukkan ke `config/config.php`.
+4. **SMTP untuk OTP**
+   Isi kredensial SMTP Gmail di `config/config.php` jika ingin mengaktifkan reset password via OTP.
 
 ---
 
