@@ -36,6 +36,7 @@ Route::get('/profile', [\App\Http\Controllers\Profile::class, 'index'])->name('p
 Route::get('/produksaya', [\App\Http\Controllers\Produksaya::class, 'index'])->name('produksaya');
 Route::get('/produksaya/edit/{id}', [\App\Http\Controllers\Produksaya::class, 'edit'])->name('produksaya.edit');
 Route::get('/verifikasiakun', [\App\Http\Controllers\Verifikasiakun::class, 'index'])->name('verifikasiakun');
+Route::post('/verifikasiakun/submit', [\App\Http\Controllers\Verifikasiakun::class, 'submit'])->name('verifikasiakun.submit');
 
 // Admin Routes
 Route::get('/dashboardadmin', [\App\Http\Controllers\Dashboardadmin::class, 'index'])->name('dashboardadmin');

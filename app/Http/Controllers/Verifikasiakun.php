@@ -96,7 +96,7 @@ class Verifikasiakun extends Controller
             'status_verifikasi' => 'menunggu'
         ];
 
-        if ($verifikasiModel->createVerification($dataPengajuan)) {
+        if ($verifikasiModel->ajukanVerifikasi($dataPengajuan)) {
             $akunModel->updateStatusVerifikasi($_SESSION['user_akun_id'], 'menunggu');
             
             return redirect('/verifikasiakun')->with([
