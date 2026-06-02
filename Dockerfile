@@ -1,4 +1,4 @@
-FROM serversideup/php:8.4-fpm-nginx
+FROM serversideup/php:8.4-frankenphp
 
 USER root
 
@@ -6,7 +6,8 @@ USER root
 RUN install-php-extensions pdo_mysql
 
 ENV PHP_OPCACHE_ENABLE=1
-ENV WEBROOT=/var/www/html/public
+ENV APP_BASE_DIR=/var/www/html
+ENV CADDY_SERVER_ROOT=/var/www/html/public
 
 WORKDIR /var/www/html
 COPY --chown=www-data:www-data . .
