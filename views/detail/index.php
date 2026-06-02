@@ -140,25 +140,19 @@
                         </div>
                     <?php endif; ?>
 
-                    <!-- Quantity Selector -->
-                    <div class="mb-6">
-                        <label class="block text-sm font-bold text-slate-900 mb-3">Jumlah Pembelian (kg)</label>
-                        <div class="flex items-center gap-2 bg-slate-50 rounded-2xl p-2 border border-slate-200">
-                            <button onclick="decreaseQuantity()" class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-white hover:bg-slate-100 transition font-bold text-lg text-slate-700 border border-slate-300">
-                                −
-                            </button>
-                            <input type="number" id="quantity" value="<?= $data['produk']['min_order']; ?>" min="<?= $data['produk']['min_order']; ?>" class="flex-1 px-2 py-2 bg-transparent text-center font-bold text-lg focus:outline-none" readonly>
-                            <button onclick="increaseQuantity()" class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-white hover:bg-slate-100 transition font-bold text-lg text-slate-700 border border-slate-300">
-                                +
-                            </button>
-                        </div>
-                        <p class="text-xs text-slate-500 mt-2">Min: <?= number_format($data['produk']['min_order'], 2, ',', '.'); ?> kg</p>
-                    </div>
-
                     <!-- Buy Button -->
-                    <button class="w-full bg-emerald-600 text-white py-3.5 rounded-2xl font-bold text-lg hover:bg-emerald-700 active:scale-95 transition-all shadow-lg hover:shadow-xl">
-                        Beli Sekarang
-                    </button>
+                    <?php 
+                    $isSeller = isset($_SESSION['user_akun_id']) && $_SESSION['user_akun_id'] == $data['produk']['penjual_id'];
+                    if ($isSeller): 
+                    ?>
+                        <button disabled class="w-full bg-slate-400 text-white py-3.5 rounded-2xl font-bold text-lg cursor-not-allowed shadow-md">
+                            Anda Penjual Produk Ini
+                        </button>
+                    <?php else: ?>
+                        <a href="<?= BASEURL; ?>/checkout/<?= $data['produk']['produk_id']; ?>" class="block w-full text-center bg-emerald-600 text-white py-3.5 rounded-2xl font-bold text-lg hover:bg-emerald-700 active:scale-95 transition-all shadow-lg hover:shadow-xl">
+                            Beli Sekarang
+                        </a>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -174,21 +168,4 @@
     </div>
 </main>
 
-<script>
-function increaseQuantity() {
-    const input = document.getElementById('quantity');
-    const minOrder = <?= $data['produk']['min_order']; ?>;
-    let value = parseFloat(input.value) || minOrder;
-    value += minOrder;
-    input.value = value.toFixed(2);
-}
 
-function decreaseQuantity() {
-    const input = document.getElementById('quantity');
-    const minOrder = <?= $data['produk']['min_order']; ?>;
-    let value = parseFloat(input.value) || minOrder;
-    value -= minOrder;
-    if (value < minOrder) value = minOrder;
-    input.value = value.toFixed(2);
-}
-</script>

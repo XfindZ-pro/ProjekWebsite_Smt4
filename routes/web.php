@@ -31,11 +31,13 @@ Route::get('/jualan', [\App\Http\Controllers\Jualan::class, 'index'])->name('jua
 Route::get('/tentang', [\App\Http\Controllers\Tentang::class, 'index'])->name('tentang');
 Route::get('/caribahanbaku', [\App\Http\Controllers\Caribahanbaku::class, 'index'])->name('caribahanbaku');
 Route::get('/detail/{id}', [\App\Http\Controllers\Detail::class, 'index'])->name('detail');
+Route::get('/checkout/{id}', [\App\Http\Controllers\Checkout::class, 'index'])->name('checkout');
 
 // User Routes
 Route::get('/profile', [\App\Http\Controllers\Profile::class, 'index'])->name('profile');
 Route::get('/produksaya', [\App\Http\Controllers\Produksaya::class, 'index'])->name('produksaya');
 Route::get('/produksaya/edit/{id}', [\App\Http\Controllers\Produksaya::class, 'edit'])->name('produksaya.edit');
+Route::get('/order', [\App\Http\Controllers\Order::class, 'index'])->name('order');
 Route::get('/verifikasiakun', [\App\Http\Controllers\Verifikasiakun::class, 'index'])->name('verifikasiakun');
 Route::post('/verifikasiakun/submit', [\App\Http\Controllers\Verifikasiakun::class, 'submit'])->name('verifikasiakun.submit');
 
