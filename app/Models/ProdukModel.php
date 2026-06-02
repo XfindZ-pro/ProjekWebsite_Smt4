@@ -227,8 +227,16 @@ class ProdukModel
                 default: $query .= " ORDER BY created_at DESC"; break;
             }
 
+            // Apply a default limit to avoid very long-running queries
+            $limit = isset($filter['limit']) && is_numeric($filter['limit']) && $filter['limit'] > 0
+                ? (int) $filter['limit']
+                : 200; // sensible default
+
+            $query .= " LIMIT :limit";
+
             $stmt = $conn->prepare($query);
             foreach ($params as $key => $val) $stmt->bindValue($key, $val);
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Throwable $e) {

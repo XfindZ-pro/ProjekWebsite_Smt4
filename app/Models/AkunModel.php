@@ -140,4 +140,15 @@ class AkunModel
         $stmt->bindParam(':akun_id', $akun_id);
         return $stmt->execute();
     }
+
+    public function getVerifiedPartners()
+    {
+        try {
+            $stmt = $this->db->conn()->prepare("SELECT akun_id, nama, email, peran, foto_profil, foto_banner, created_at FROM akun WHERE status_verifikasi = 'disetujui' ORDER BY created_at DESC");
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            return [];
+        }
+    }
 }

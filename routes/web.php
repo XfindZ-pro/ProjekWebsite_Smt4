@@ -26,10 +26,11 @@ Route::post('/lupapassword/reset', [\App\Http\Controllers\Lupapassword::class, '
 Route::post('/lupapassword/updatePassword', [\App\Http\Controllers\Lupapassword::class, 'reset']);
 
 // Main Routes
-Route::get('/katalog', [\App\Http\Controllers\Katalog::class, 'index'])->name('katalog');
+Route::get('/katalog', [\App\Http\Controllers\DaftarMitra::class, 'index'])->name('katalog');
 Route::get('/jualan', [\App\Http\Controllers\Jualan::class, 'index'])->name('jualan');
 Route::get('/tentang', [\App\Http\Controllers\Tentang::class, 'index'])->name('tentang');
 Route::get('/caribahanbaku', [\App\Http\Controllers\Caribahanbaku::class, 'index'])->name('caribahanbaku');
+Route::get('/detail/{id}', [\App\Http\Controllers\Detail::class, 'index'])->name('detail');
 
 // User Routes
 Route::get('/profile', [\App\Http\Controllers\Profile::class, 'index'])->name('profile');
