@@ -29,6 +29,17 @@
                             </a>
                         </div>
                         
+                        <?php if(isset($_SESSION['user_akun_id'])): ?>
+                        <div class="w-full sm:w-auto">
+                            <a href="<?= BASEURL; ?>/pesanansaya" class="inline-flex items-center justify-center px-6 py-2.5 border-2 border-indigo-600 text-sm font-bold rounded-full text-white bg-indigo-600 hover:bg-indigo-700 md:py-3 md:px-8 md:text-base transition transform hover:-translate-y-0.5 shadow-lg w-full">
+                                <svg class="w-4 h-4 md:w-5 md:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                                </svg>
+                                Pesanan Saya
+                            </a>
+                        </div>
+                        <?php endif; ?>
+                        
                         <div class="w-full sm:w-auto">
                             <a href="<?= BASEURL; ?>/jualan" class="inline-flex items-center justify-center px-6 py-2.5 border-2 border-emerald-600 text-sm font-bold rounded-full text-emerald-700 bg-emerald-50 hover:bg-emerald-100 md:py-3 md:px-8 md:text-base transition transform hover:-translate-y-0.5 shadow-sm w-full">
                                 Jual Limbah dan Barang Bekas

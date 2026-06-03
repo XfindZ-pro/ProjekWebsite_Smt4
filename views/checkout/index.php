@@ -36,7 +36,7 @@
                 </div>
 
                 <!-- Checkout Form -->
-                <form action="#" method="POST">
+                <form id="checkoutForm" method="POST">
                     
                     <!-- Hide Spin Buttons CSS -->
                     <style>
@@ -68,11 +68,47 @@
                         </div>
                     </div>
 
-                    <!-- Alamat Pengiriman -->
+                    <!-- Metode Pengiriman -->
                     <div class="mb-8">
+                        <label class="block text-sm font-bold text-slate-900 mb-3">Metode Pengiriman</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="shipping_method" value="pickup" class="peer sr-only" checked onchange="updateShippingMethod()">
+                                <div class="p-4 border-2 border-slate-200 rounded-2xl peer-checked:border-emerald-500 peer-checked:bg-emerald-50 transition-all hover:bg-slate-50">
+                                    <div class="font-bold text-slate-900 text-base">Ambil Sendiri (Pickup)</div>
+                                    <div class="text-xs text-slate-500 mt-1">Ambil langsung di lokasi penjual (Bebas Biaya Layanan)</div>
+                                </div>
+                            </label>
+                            
+                            <label class="cursor-pointer">
+                                <input type="radio" name="shipping_method" value="dikirim" class="peer sr-only" onchange="updateShippingMethod()">
+                                <div class="p-4 border-2 border-slate-200 rounded-2xl peer-checked:border-emerald-500 peer-checked:bg-emerald-50 transition-all hover:bg-slate-50">
+                                    <div class="font-bold text-slate-900 text-base">Kirim ke Alamat (Dikirim)</div>
+                                    <div class="text-xs text-slate-500 mt-1">Kirim via kurir (Dikenakan Biaya Layanan Rp 15.000)</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Alamat Pengiriman (Ditampilkan jika memilih opsi Dikirim) -->
+                    <div id="alamat_pengiriman_container" class="mb-8 hidden">
                         <label for="alamat_pengiriman" class="block text-sm font-bold text-slate-900 mb-3">Alamat Pengiriman</label>
-                        <textarea id="alamat_pengiriman" name="alamat_pengiriman" rows="3" required placeholder="Masukkan alamat pengiriman lengkap Anda (Nama Jalan, No. Rumah, RT/RW, Kecamatan, Kota/Kabupaten, Provinsi)" 
+                        <textarea id="alamat_pengiriman" name="alamat_pengiriman" rows="3" placeholder="Masukkan alamat pengiriman lengkap Anda (Nama Jalan, No. Rumah, RT/RW, Kecamatan, Kota/Kabupaten, Provinsi)" 
                                   class="w-full rounded-2xl border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all placeholder-slate-400 font-medium"></textarea>
+                    </div>
+
+                    <!-- Info Lokasi Pickup (Ditampilkan jika memilih opsi Pickup) -->
+                    <div id="lokasi_pickup_container" class="mb-8 bg-amber-50 border border-amber-200 rounded-2xl p-4 flex gap-3">
+                        <div class="text-amber-600 flex-shrink-0">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-slate-900">Lokasi Pengambilan Barang (Pickup):</p>
+                            <p class="text-sm text-slate-700 mt-1 font-semibold"><?= htmlspecialchars($data['produk']['lokasi_pickup']); ?></p>
+                        </div>
                     </div>
 
                     <!-- Payment Method Template -->
@@ -114,7 +150,7 @@
                         </div>
                         <div class="flex justify-between items-center mb-4">
                             <p class="text-slate-600">Biaya Layanan</p>
-                            <p class="font-semibold text-slate-900">Rp 0</p>
+                            <p class="font-semibold text-slate-900" id="serviceFeeDisplay">Rp 0</p>
                         </div>
                         <div class="border-t border-slate-200 pt-4 flex justify-between items-center">
                             <p class="font-bold text-lg text-slate-900">Total Tagihan</p>
@@ -123,10 +159,34 @@
                     </div>
 
                     <!-- Submit Button -->
-                    <button type="button" onclick="alert('Ini adalah halaman template checkout. Fungsionalitas pemrosesan pesanan belum diimplementasikan.')" class="w-full bg-emerald-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-emerald-700 active:scale-95 transition-all shadow-lg hover:shadow-xl">
+                    <button type="submit" id="submitPaymentBtn" class="w-full bg-emerald-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-emerald-700 active:scale-95 transition-all shadow-lg hover:shadow-xl">
                         Proses Pembayaran
                     </button>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Simulation Success Modal -->
+    <div id="simulationSuccessModal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/75 px-4 py-8 backdrop-blur-sm transition-opacity">
+        <div class="relative w-full max-w-md rounded-3xl bg-white p-8 shadow-2xl text-center space-y-6 animate-[bounce_0.5s_ease-out_1]">
+            <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                <svg class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+            
+            <div>
+                <h3 class="text-2xl font-black text-slate-900">Pembayaran Berhasil!</h3>
+                <p class="mt-3 text-sm text-slate-500 font-medium leading-relaxed">
+                    Karena ini merupakan <span class="font-bold text-emerald-600">simulasi e-commerce</span>, pesanan Anda telah berhasil dibuat di database tanpa melakukan pembayaran nyata.
+                </p>
+            </div>
+            
+            <div class="pt-4 border-t border-slate-100">
+                <a href="<?= BASEURL; ?>/pesanansaya" class="w-full inline-flex items-center justify-center rounded-full bg-emerald-600 px-8 py-3.5 text-base font-bold text-white hover:bg-emerald-700 transition shadow-md hover:shadow-lg active:scale-95">
+                    Lihat Pesanan Saya
+                </a>
             </div>
         </div>
     </div>
@@ -146,6 +206,17 @@ function updateTotalPrice() {
     
     const totalPrice = basePrice * quantity;
     
+    // Hitung biaya layanan berdasarkan metode pengiriman
+    const shippingMethodEl = document.querySelector('input[name="shipping_method"]:checked');
+    const shippingMethod = shippingMethodEl ? shippingMethodEl.value : 'pickup';
+    let serviceFee = 0;
+    
+    if (shippingMethod === 'dikirim') {
+        serviceFee = 15000; // Contoh biaya layanan Rp 15.000 jika barang dikirim
+    }
+    
+    const grandTotal = totalPrice + serviceFee;
+    
     const formatter = new Intl.NumberFormat('id-ID', {
         style: 'currency',
         currency: 'IDR',
@@ -153,9 +224,31 @@ function updateTotalPrice() {
         maximumFractionDigits: 0
     });
     
-    const formattedPrice = formatter.format(totalPrice);
-    document.getElementById('totalPriceDisplay').innerText = formattedPrice;
-    document.getElementById('grandTotalDisplay').innerText = formattedPrice;
+    document.getElementById('totalPriceDisplay').innerText = formatter.format(totalPrice);
+    document.getElementById('serviceFeeDisplay').innerText = formatter.format(serviceFee);
+    document.getElementById('grandTotalDisplay').innerText = formatter.format(grandTotal);
+}
+
+function updateShippingMethod() {
+    const shippingMethodEl = document.querySelector('input[name="shipping_method"]:checked');
+    const shippingMethod = shippingMethodEl ? shippingMethodEl.value : 'pickup';
+    
+    const alamatContainer = document.getElementById('alamat_pengiriman_container');
+    const alamatInput = document.getElementById('alamat_pengiriman');
+    const lokasiContainer = document.getElementById('lokasi_pickup_container');
+    
+    if (shippingMethod === 'dikirim') {
+        alamatContainer.classList.remove('hidden');
+        alamatInput.required = true;
+        lokasiContainer.classList.add('hidden');
+    } else {
+        alamatContainer.classList.add('hidden');
+        alamatInput.required = false;
+        alamatInput.value = '';
+        lokasiContainer.classList.remove('hidden');
+    }
+    
+    updateTotalPrice();
 }
 
 function increaseQuantity() {
@@ -177,6 +270,62 @@ function decreaseQuantity() {
     updateTotalPrice();
 }
 
-// Initialize total price on load
-document.addEventListener('DOMContentLoaded', updateTotalPrice);
+// Inisialisasi awal saat halaman dimuat
+document.addEventListener('DOMContentLoaded', () => {
+    updateShippingMethod();
+
+    const checkoutForm = document.getElementById('checkoutForm');
+    const simulationModal = document.getElementById('simulationSuccessModal');
+    const submitBtn = document.getElementById('submitPaymentBtn');
+
+    if (checkoutForm && submitBtn && simulationModal) {
+        checkoutForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            // Kunci tombol kirim
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Memproses...';
+
+            const formData = new FormData(checkoutForm);
+            const url = '<?= BASEURL; ?>/checkout/<?= $data['produk']['produk_id']; ?>';
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '<?= csrf_token(); ?>'
+                },
+                body: formData
+            })
+            .then(response => {
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.indexOf('application/json') !== -1) {
+                    return response.json();
+                } else {
+                    return response.text().then(text => {
+                        console.error('Bukan JSON:', text);
+                        throw new Error('Format respons server tidak valid.');
+                    });
+                }
+            })
+            .then(res => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Proses Pembayaran';
+
+                if (res.success) {
+                    // Tampilkan modal simulasi sukses
+                    simulationModal.classList.remove('hidden');
+                    simulationModal.classList.add('flex');
+                } else {
+                    alert(res.message || 'Gagal memproses pesanan.');
+                }
+            })
+            .catch(err => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Proses Pembayaran';
+                console.error(err);
+                alert(err.message || 'Terjadi kesalahan koneksi saat memproses pesanan.');
+            });
+        });
+    }
+});
 </script>
