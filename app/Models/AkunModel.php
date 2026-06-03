@@ -151,4 +151,12 @@ class AkunModel
             return [];
         }
     }
+
+    public function verifyEmail($akun_id)
+    {
+        $query = "UPDATE akun SET verifikasi_email = 'terverifikasi' WHERE akun_id = :akun_id";
+        $stmt = $this->db->conn()->prepare($query);
+        $stmt->bindParam(':akun_id', $akun_id);
+        return $stmt->execute();
+    }
 }

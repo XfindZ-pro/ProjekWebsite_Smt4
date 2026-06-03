@@ -35,6 +35,8 @@ Route::get('/checkout/{id}', [\App\Http\Controllers\Checkout::class, 'index'])->
 
 // User Routes
 Route::get('/profile', [\App\Http\Controllers\Profile::class, 'index'])->name('profile');
+Route::post('/profile/sendOtp', [\App\Http\Controllers\Profile::class, 'sendOtp'])->name('profile.sendOtp');
+Route::post('/profile/verifyOtp', [\App\Http\Controllers\Profile::class, 'verifyOtp'])->name('profile.verifyOtp');
 Route::get('/produksaya', [\App\Http\Controllers\Produksaya::class, 'index'])->name('produksaya');
 Route::get('/produksaya/edit/{id}', [\App\Http\Controllers\Produksaya::class, 'edit'])->name('produksaya.edit');
 Route::get('/order', [\App\Http\Controllers\Order::class, 'index'])->name('order');

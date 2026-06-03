@@ -126,14 +126,23 @@
                     
                     <div class="rounded-3xl border border-slate-100 bg-slate-50 p-5">
                         <p class="text-sm text-slate-500">Email</p>
-                        <p class="mt-2 text-lg font-semibold text-slate-900"><?= htmlspecialchars($user['email'] ?? '-'); ?></p>
+                        <div class="mt-2 flex items-center justify-between flex-wrap gap-2">
+                            <p class="text-lg font-semibold text-slate-900"><?= htmlspecialchars($user['email'] ?? '-'); ?></p>
+                            <?php if (isset($user['verifikasi_email']) && $user['verifikasi_email'] === 'terverifikasi'): ?>
+                                <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">Terverifikasi ✓</span>
+                            <?php else: ?>
+                                <button id="verifyEmailButton" type="button" class="rounded-full bg-amber-500 px-4 py-1.5 text-xs font-bold text-white hover:bg-amber-600 transition shadow-sm">
+                                    Verifikasi Email
+                                </button>
+                            <?php endif; ?>
+                        </div>
                     </div>
                     <div class="rounded-3xl border border-slate-100 bg-slate-50 p-5">
                         <p class="text-sm text-slate-500">Peran</p>
                         <p class="mt-2 text-lg font-semibold text-slate-900 uppercase"><?= htmlspecialchars($user['peran'] ?? '-'); ?></p>
                     </div>
                     <div class="rounded-3xl border border-slate-100 bg-slate-50 p-5">
-                        <p class="text-sm text-slate-500">Status Verifikasi</p>
+                        <p class="text-sm text-slate-500">Status Verifikasi Mitra</p>
                         <span class="mt-2 inline-flex rounded-full px-3 py-2 text-sm font-semibold <?= $statusClass; ?>"><?= $statusLabel; ?></span>
                     </div>
                 </div>
@@ -162,6 +171,38 @@
                     <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
                         <button type="button" id="cancelNameButton" class="rounded-full border border-slate-300 bg-white px-6 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 transition shadow-sm">Batal</button>
                         <button type="submit" class="rounded-full bg-emerald-600 px-8 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 transition shadow-md active:scale-95">Simpan Perubahan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Verification Modal -->
+    <div id="emailVerifyModal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/70 px-4 py-8 backdrop-blur-sm transition-opacity">
+        <div class="relative w-full max-w-md rounded-3xl bg-white p-8 shadow-2xl">
+            <button id="closeEmailModalButton" type="button" class="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 focus:outline-none transition">
+                ×
+            </button>
+            <div class="space-y-6">
+                <div class="text-center">
+                    <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 19v-8.93a2 2 0 01.89-1.664l8-4.796a2 2 0 011.99 0l8 4.796A2 2 0 0122 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-2.25-1.5a2 2 0 00-1.99 0L10.25 14.5" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900">Verifikasi Email</h3>
+                    <p class="mt-2 text-sm text-slate-500">Masukkan 6 digit kode OTP yang kami kirimkan ke email Anda. Kode ini berlaku selama <span class="font-bold text-red-600">1 menit</span>.</p>
+                </div>
+                
+                <form id="emailVerifyForm" class="space-y-6">
+                    <div>
+                        <input type="text" id="otp_code" required maxlength="6" placeholder="Masukkan 6 Digit OTP" 
+                               class="w-full text-center tracking-widest text-2xl font-bold rounded-2xl border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all">
+                    </div>
+                    
+                    <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
+                        <button type="button" id="cancelEmailVerifyButton" class="rounded-full border border-slate-300 bg-white px-6 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 transition shadow-sm">Batal</button>
+                        <button type="submit" id="submitEmailVerifyButton" class="rounded-full bg-emerald-600 px-8 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 transition shadow-md active:scale-95">Verifikasi</button>
                     </div>
                 </form>
             </div>
@@ -239,6 +280,107 @@
         nameEditModal.addEventListener('click', (e) => {
             if (e.target === nameEditModal) closeNameModal();
         });
+
+
+        // ====== LOGIKA MODAL VERIFIKASI EMAIL ======
+        const emailVerifyModal = document.getElementById('emailVerifyModal');
+        const verifyEmailButton = document.getElementById('verifyEmailButton');
+        const closeEmailModalButton = document.getElementById('closeEmailModalButton');
+        const cancelEmailVerifyButton = document.getElementById('cancelEmailVerifyButton');
+        const emailVerifyForm = document.getElementById('emailVerifyForm');
+        const otpCodeInput = document.getElementById('otp_code');
+
+        if (verifyEmailButton) {
+            verifyEmailButton.addEventListener('click', () => {
+                verifyEmailButton.disabled = true;
+                verifyEmailButton.textContent = 'Mengirim OTP...';
+
+                // Send request to send OTP
+                fetch(`${baseUrl}/profile/sendOtp`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '<?= csrf_token(); ?>',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    verifyEmailButton.disabled = false;
+                    verifyEmailButton.textContent = 'Verifikasi Email';
+
+                    if (data.success) {
+                        emailVerifyModal.classList.remove('hidden');
+                        emailVerifyModal.classList.add('flex');
+                    } else {
+                        alert(data.message || 'Gagal mengirim OTP.');
+                    }
+                })
+                .catch(err => {
+                    verifyEmailButton.disabled = false;
+                    verifyEmailButton.textContent = 'Verifikasi Email';
+                    console.error(err);
+                    alert('Terjadi kesalahan koneksi saat mengirim OTP.');
+                });
+            });
+        }
+
+        const closeEmailModal = () => {
+            emailVerifyModal.classList.add('hidden');
+            emailVerifyModal.classList.remove('flex');
+            otpCodeInput.value = '';
+        };
+
+        if (closeEmailModalButton) closeEmailModalButton.addEventListener('click', closeEmailModal);
+        if (cancelEmailVerifyButton) cancelEmailVerifyButton.addEventListener('click', closeEmailModal);
+
+        if (emailVerifyModal) {
+            emailVerifyModal.addEventListener('click', (e) => {
+                if (e.target === emailVerifyModal) closeEmailModal();
+            });
+        }
+
+        if (emailVerifyForm) {
+            emailVerifyForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const otp = otpCodeInput.value.trim();
+
+                if (otp.length !== 6) {
+                    alert('Kode OTP harus terdiri dari 6 digit.');
+                    return;
+                }
+
+                const submitBtn = document.getElementById('submitEmailVerifyButton');
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Memverifikasi...';
+
+                fetch(`${baseUrl}/profile/verifyOtp`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '<?= csrf_token(); ?>',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ kode_otp: otp })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Verifikasi';
+
+                    if (data.success) {
+                        alert(data.message);
+                        window.location.reload();
+                    } else {
+                        alert(data.message || 'OTP tidak valid.');
+                    }
+                })
+                .catch(err => {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Verifikasi';
+                    console.error(err);
+                    alert('Terjadi kesalahan saat memproses verifikasi OTP.');
+                });
+            });
+        }
 
 
         // ====== LOGIKA MODAL FOTO (Sama seperti sebelumnya) ======
