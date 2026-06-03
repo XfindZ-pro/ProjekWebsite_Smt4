@@ -25,6 +25,11 @@ class AppServiceProvider extends ServiceProvider
             class_alias('App\Core\Database', 'Database');
         }
 
+        // Force HTTPS jika dideteksi di belakang proxy HTTPS (misal Railway)
+        if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         // Fix for "Undefined variable $data" in old view templates
         View::composer('*', function ($view) {
             $data = $view->getData();

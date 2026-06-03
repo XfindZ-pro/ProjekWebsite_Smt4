@@ -1,7 +1,10 @@
 <?php
 
 // 1. Cek apakah server menggunakan HTTPS (biasanya di hosting) atau HTTP (biasanya di localhost)
-$protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://";
+// Periksa juga header X-Forwarded-Proto untuk deteksi HTTPS di belakang reverse proxy seperti Railway
+$isHttps = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') || 
+           (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+$protocol = ($isHttps ? "https" : "http") . "://";
 
 // 2. Ambil nama host/domain secara otomatis (akan berisi 'localhost' jika di lokal, atau 'namadomain.com' jika di hosting)
 $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
