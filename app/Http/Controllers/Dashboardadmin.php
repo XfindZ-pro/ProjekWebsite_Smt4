@@ -41,6 +41,10 @@ class Dashboardadmin extends Controller
         $data['product_active'] = $produkModel->countActiveProducts();
         $data['approved_today'] = $verifikasiModel->countApprovedToday();
 
+        // Get paginated products for Manajemen Produk tab
+        $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+        $data['produk_data'] = $produkModel->getAllProdukWithStats($page, 10);
+
         return view('templates.header', $data) .
                view('dashboardadmin.index', $data) .
                view('templates.footer');

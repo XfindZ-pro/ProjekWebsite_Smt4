@@ -3,7 +3,7 @@
         'name' => 'xfindz/valora',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'c7de095b88ff24a6d42a46b96779d235ead2e82c',
+        'reference' => '76f929e2b768ce834175b6bfffbd4613af673070',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -1148,7 +1148,7 @@
         'xfindz/valora' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'c7de095b88ff24a6d42a46b96779d235ead2e82c',
+            'reference' => '76f929e2b768ce834175b6bfffbd4613af673070',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

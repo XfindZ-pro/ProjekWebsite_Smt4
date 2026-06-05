@@ -555,28 +555,98 @@
 
         <div id="tab-produk" class="tab-content hidden animate-fade-in">
             <div class="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-                <div class="p-6 border-b border-slate-100 flex justify-between items-center">
-                    <h2 class="text-xl font-bold text-slate-900">Katalog Material Sisa</h2>
-                    <select
-                        class="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm focus:border-emerald-500 focus:outline-none">
-                        <option>Semua Kategori</option>
-                        <option>Tekstil</option>
-                        <option>Kayu</option>
-                        <option>Plastik</option>
-                    </select>
-                </div>
-                <div class="p-16 text-center">
-                    <div
-                        class="mx-auto mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-400">
-                        <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                        </svg>
+                <div class="p-6 border-b border-slate-100 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Manajemen Produk</h2>
+                        <p class="text-xs text-slate-500 mt-1">Total: <?= number_format($data['produk_data']['total'] ?? 0); ?> produk terdaftar.</p>
                     </div>
-                    <h3 class="text-lg font-bold text-slate-900">Tabel Produk Sedang Disiapkan</h3>
-                    <p class="mt-2 text-sm text-slate-500">Nantinya, semua barang yang diunggah penjual akan dikelola
-                        dan dimonitor dari halaman ini.</p>
                 </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-slate-600">
+                        <thead class="bg-slate-50 text-slate-500 uppercase">
+                            <tr>
+                                <th class="px-6 py-4 font-semibold">Produk</th>
+                                <th class="px-6 py-4 font-semibold">Kategori</th>
+                                <th class="px-6 py-4 font-semibold">Harga / Stok</th>
+                                <th class="px-6 py-4 font-semibold">Statistik</th>
+                                <th class="px-6 py-4 font-semibold">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <?php if (!empty($data['produk_data']['data'])): ?>
+                                <?php foreach ($data['produk_data']['data'] as $p): ?>
+                                    <tr class="hover:bg-slate-50 transition">
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center gap-3">
+                                                <?php if (!empty($p['foto_1'])): ?>
+                                                    <img src="data:image/jpeg;base64,<?= base64_encode($p['foto_1']); ?>" class="w-10 h-10 rounded-lg object-cover border border-slate-200">
+                                                <?php else: ?>
+                                                    <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
+                                                        <svg class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                                    </div>
+                                                <?php endif; ?>
+                                                <div>
+                                                    <div class="font-bold text-slate-900"><?= htmlspecialchars($p['nama_produk'] ?? '-'); ?></div>
+                                                    <div class="text-xs text-slate-500">Penjual: <?= htmlspecialchars($p['nama_penjual'] ?? 'Anonim'); ?></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <span class="rounded-full bg-slate-100 text-slate-700 px-3 py-1 text-xs font-semibold uppercase"><?= htmlspecialchars($p['kategori_limbah'] ?? '-'); ?></span>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <div class="font-medium text-slate-900">Rp <?= number_format($p['harga_per_kg'] ?? 0, 0, ',', '.'); ?>/kg</div>
+                                            <div class="text-xs text-slate-500"><?= number_format($p['berat_tersedia'] ?? 0, 0, ',', '.'); ?> kg tersedia</div>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <div class="text-sm font-medium text-emerald-600"><?= number_format($p['total_terjual'] ?? 0, 0, ',', '.'); ?> kg Terjual</div>
+                                            <div class="text-xs text-slate-500"><?= number_format($p['total_pesanan'] ?? 0, 0, ',', '.'); ?> Pesanan</div>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <?php if(($p['status_produk'] ?? '') === 'aktif'): ?>
+                                                <span class="rounded-full bg-emerald-50 text-emerald-700 px-3 py-1 text-xs font-bold">Aktif</span>
+                                            <?php else: ?>
+                                                <span class="rounded-full bg-red-50 text-red-700 px-3 py-1 text-xs font-bold">Tidak Aktif</span>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="5" class="p-10 text-center text-slate-400 font-medium">Belum ada data produk.</td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- PHP Pagination Controls -->
+                <?php if (isset($data['produk_data']) && $data['produk_data']['total'] > 0): ?>
+                    <div class="p-6 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <p class="text-sm text-slate-500">
+                            Halaman <?= $data['produk_data']['current_page'] ?> dari <?= max(1, $data['produk_data']['pages']) ?>
+                        </p>
+                        <?php if ($data['produk_data']['pages'] > 1): ?>
+                            <div class="flex items-center gap-2">
+                                <?php if ($data['produk_data']['current_page'] > 1): ?>
+                                    <a href="?page=<?= $data['produk_data']['current_page'] - 1 ?>&tab=tab-produk" class="px-4 py-2 text-xs font-bold rounded-full border text-slate-600 border-slate-200 hover:bg-white hover:border-emerald-500 hover:text-emerald-600 transition">Sebelumnya</a>
+                                <?php else: ?>
+                                    <button disabled class="px-4 py-2 text-xs font-bold rounded-full border text-slate-300 border-slate-100 cursor-not-allowed">Sebelumnya</button>
+                                <?php endif; ?>
+
+                                <?php for($i = 1; $i <= $data['produk_data']['pages']; $i++): ?>
+                                    <a href="?page=<?= $i ?>&tab=tab-produk" class="h-8 w-8 text-xs font-bold flex items-center justify-center rounded-full transition border <?= $i == $data['produk_data']['current_page'] ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-200 text-slate-600 hover:border-emerald-500' ?>"><?= $i ?></a>
+                                <?php endfor; ?>
+
+                                <?php if ($data['produk_data']['current_page'] < $data['produk_data']['pages']): ?>
+                                    <a href="?page=<?= $data['produk_data']['current_page'] + 1 ?>&tab=tab-produk" class="px-4 py-2 text-xs font-bold rounded-full border text-slate-600 border-slate-200 hover:bg-white hover:border-emerald-500 hover:text-emerald-600 transition">Selanjutnya</a>
+                                <?php else: ?>
+                                    <button disabled class="px-4 py-2 text-xs font-bold rounded-full border text-slate-300 border-slate-100 cursor-not-allowed">Selanjutnya</button>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -614,31 +684,47 @@
             const tabBtns = document.querySelectorAll('.tab-btn');
             const tabContents = document.querySelectorAll('.tab-content');
 
+            // Set active tab based on URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const activeTabId = urlParams.get('tab') || 'tab-dashboard';
+            const initialBtn = document.querySelector(`.tab-btn[data-target="${activeTabId}"]`);
+
+            function switchTab(btn) {
+                // 1. Reset semua tombol ke tampilan tidak aktif
+                tabBtns.forEach(b => {
+                    b.classList.remove('bg-emerald-600', 'text-white', 'border-emerald-600');
+                    b.classList.add('bg-white', 'text-slate-700', 'hover:bg-slate-50', 'border-slate-200');
+                });
+
+                // 2. Berikan warna hijau pada tombol yang sedang diklik
+                btn.classList.remove('bg-white', 'text-slate-700', 'hover:bg-slate-50', 'border-slate-200');
+                btn.classList.add('bg-emerald-600', 'text-white', 'border-emerald-600');
+
+                // 3. Sembunyikan semua konten layer
+                tabContents.forEach(content => {
+                    content.classList.add('hidden');
+                    content.classList.remove('block');
+                });
+
+                // 4. Munculkan hanya konten yang ID-nya cocok dengan data-target tombol
+                const targetId = btn.getAttribute('data-target');
+                const targetContent = document.getElementById(targetId);
+                if (targetContent) {
+                    targetContent.classList.remove('hidden');
+                    targetContent.classList.add('block');
+                }
+            }
+
+            if (initialBtn) switchTab(initialBtn);
+
             tabBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
-                    // 1. Reset semua tombol ke tampilan tidak aktif
-                    tabBtns.forEach(b => {
-                        b.classList.remove('bg-emerald-600', 'text-white', 'border-emerald-600');
-                        b.classList.add('bg-white', 'text-slate-700', 'hover:bg-slate-50', 'border-slate-200');
-                    });
-
-                    // 2. Berikan warna hijau pada tombol yang sedang diklik
-                    btn.classList.remove('bg-white', 'text-slate-700', 'hover:bg-slate-50', 'border-slate-200');
-                    btn.classList.add('bg-emerald-600', 'text-white', 'border-emerald-600');
-
-                    // 3. Sembunyikan semua konten layer
-                    tabContents.forEach(content => {
-                        content.classList.add('hidden');
-                        content.classList.remove('block');
-                    });
-
-                    // 4. Munculkan hanya konten yang ID-nya cocok dengan data-target tombol
+                    switchTab(btn);
+                    // Update URL without reloading
                     const targetId = btn.getAttribute('data-target');
-                    const targetContent = document.getElementById(targetId);
-                    if (targetContent) {
-                        targetContent.classList.remove('hidden');
-                        targetContent.classList.add('block');
-                    }
+                    const newUrl = new URL(window.location);
+                    newUrl.searchParams.set('tab', targetId);
+                    window.history.pushState({}, '', newUrl);
                 });
             });
         });

@@ -112,7 +112,8 @@ class AkunModel
     public function getAllUsers()
     {
         try {
-            $stmt = $this->db->conn()->prepare("SELECT akun_id, nama, email, peran, status_verifikasi, foto_profil, foto_banner, created_at FROM akun ORDER BY created_at DESC");
+            // Omit foto_profil and foto_banner to prevent Maximum execution time and memory limits
+            $stmt = $this->db->conn()->prepare("SELECT akun_id, nama, email, peran, status_verifikasi, created_at FROM akun ORDER BY created_at DESC");
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {

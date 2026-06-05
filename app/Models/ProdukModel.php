@@ -243,4 +243,46 @@ class ProdukModel
             return [];
         }
     }
+
+    public function getAllProdukWithStats($page = 1, $limit = 10)
+    {
+        $conn = $this->db->conn();
+        if (!$conn) return ['data' => [], 'total' => 0, 'pages' => 0, 'current_page' => 1];
+
+        try {
+            $stmtCount = $conn->prepare("SELECT COUNT(*) as total FROM katalog");
+            $stmtCount->execute();
+            $total = $stmtCount->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
+            $pages = ceil($total / $limit);
+
+            $offset = ($page - 1) * $limit;
+
+            $query = "SELECT k.*, a.nama as nama_penjual, 
+                             COALESCE(SUM(CASE WHEN o.status_order != 'dibatalkan' THEN oi.jumlah ELSE 0 END), 0) as total_terjual,
+                             COUNT(DISTINCT oi.order_id) as total_pesanan
+                      FROM katalog k
+                      LEFT JOIN akun a ON k.penjual_id = a.akun_id
+                      LEFT JOIN order_items oi ON k.produk_id = oi.produk_id
+                      LEFT JOIN orders o ON oi.order_id = o.order_id
+                      GROUP BY k.produk_id
+                      ORDER BY k.created_at DESC
+                      LIMIT :limit OFFSET :offset";
+            
+            $stmt = $conn->prepare($query);
+            $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+            $stmt->execute();
+            
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            return [
+                'data' => $data,
+                'total' => $total,
+                'pages' => $pages,
+                'current_page' => $page
+            ];
+        } catch (Throwable $e) {
+            return ['data' => [], 'total' => 0, 'pages' => 0, 'current_page' => $page];
+        }
+    }
 }
