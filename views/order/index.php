@@ -5,6 +5,15 @@
             <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight sm:text-4xl">Order Masuk</h1>
             <p class="mt-2 text-sm text-slate-600 sm:text-base">Kelola pesanan masuk dan respon transaksi untuk produk limbah Anda.</p>
         </div>
+        <!-- Tabs -->
+        <div class="flex border-b border-slate-200 mb-8" data-aos="fade-right">
+            <a href="?tab=ongoing" class="flex-1 py-4 text-center font-bold text-sm border-b-2 transition-all <?= ($data['active_tab'] === 'ongoing') ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' ?>">
+                Daftar Order <span class="ml-1.5 px-2 py-0.5 text-xs font-bold rounded-full bg-emerald-100 text-emerald-700"><?= $data['ongoing_count']; ?></span>
+            </a>
+            <a href="?tab=selesai" class="flex-1 py-4 text-center font-bold text-sm border-b-2 transition-all <?= ($data['active_tab'] === 'selesai') ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' ?>">
+                Order Selesai <span class="ml-1.5 px-2 py-0.5 text-xs font-bold rounded-full bg-slate-100 text-slate-600"><?= $data['selesai_count']; ?></span>
+            </a>
+        </div>
 
         <div class="space-y-6" data-aos="fade-up" data-aos-delay="100">
             <?php if (empty($data['orders'])): ?>
@@ -14,8 +23,13 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-2">Belum Ada Pesanan Masuk</h3>
-                    <p class="text-slate-500 max-w-md mx-auto">Saat ini belum ada pesanan dari pembeli untuk produk limbah Anda. Terus kelola dan perbarui katalog produk Anda.</p>
+                    <?php if ($data['active_tab'] === 'ongoing'): ?>
+                        <h3 class="text-xl font-bold text-slate-900 mb-2">Belum Ada Pesanan Aktif</h3>
+                        <p class="text-slate-500 max-w-md mx-auto">Saat ini belum ada pesanan aktif/dalam proses dari pembeli. Terus kelola dan perbarui katalog produk Anda.</p>
+                    <?php else: ?>
+                        <h3 class="text-xl font-bold text-slate-900 mb-2">Belum Ada Pesanan Selesai</h3>
+                        <p class="text-slate-500 max-w-md mx-auto">Saat ini belum ada riwayat pesanan yang selesai atau dibatalkan.</p>
+                    <?php endif; ?>
                     <a href="<?= BASEURL; ?>/produksaya" class="mt-6 inline-flex items-center justify-center px-6 py-2.5 border border-transparent text-sm font-bold rounded-full text-white bg-emerald-600 hover:bg-emerald-700 transition transform hover:-translate-y-0.5 shadow-md">
                         Kelola Produk Saya
                     </a>
@@ -167,6 +181,32 @@
                         <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
+            <?php endif; ?>
+
+            <!-- PHP Pagination Controls -->
+            <?php if (isset($data['pages']) && $data['pages'] > 1): ?>
+                <div class="p-6 border border-slate-100 bg-white rounded-3xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-6">
+                    <p class="text-sm text-slate-500">
+                        Halaman <?= $data['current_page'] ?> dari <?= max(1, $data['pages']) ?> (Total: <?= $data['total'] ?> Order)
+                    </p>
+                    <div class="flex items-center gap-2">
+                        <?php if ($data['current_page'] > 1): ?>
+                            <a href="?page=<?= $data['current_page'] - 1 ?>&tab=<?= $data['active_tab'] ?>" class="px-4 py-2 text-xs font-bold rounded-full border text-slate-600 border-slate-200 hover:bg-slate-50 hover:border-emerald-500 hover:text-emerald-600 transition">Sebelumnya</a>
+                        <?php else: ?>
+                            <button disabled class="px-4 py-2 text-xs font-bold rounded-full border text-slate-300 border-slate-100 cursor-not-allowed">Sebelumnya</button>
+                        <?php endif; ?>
+
+                        <?php for($i = 1; $i <= $data['pages']; $i++): ?>
+                            <a href="?page=<?= $i ?>&tab=<?= $data['active_tab'] ?>" class="h-8 w-8 text-xs font-bold flex items-center justify-center rounded-full transition border <?= $i == $data['current_page'] ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-200 text-slate-600 hover:border-emerald-500' ?>"><?= $i ?></a>
+                        <?php endfor; ?>
+
+                        <?php if ($data['current_page'] < $data['pages']): ?>
+                            <a href="?page=<?= $data['current_page'] + 1 ?>&tab=<?= $data['active_tab'] ?>" class="px-4 py-2 text-xs font-bold rounded-full border text-slate-600 border-slate-200 hover:bg-slate-50 hover:border-emerald-500 hover:text-emerald-600 transition">Selanjutnya</a>
+                        <?php else: ?>
+                            <button disabled class="px-4 py-2 text-xs font-bold rounded-full border text-slate-300 border-slate-100 cursor-not-allowed">Selanjutnya</button>
+                        <?php endif; ?>
+                    </div>
+                </div>
             <?php endif; ?>
         </div>
     </div>

@@ -165,4 +165,85 @@ class OrderModel
             return false;
         }
     }
+
+    public function getOrdersByPenjualPaginated($penjual_id, $statuses, $page = 1, $limit = 10)
+    {
+        $conn = $this->db->conn();
+        if (!$conn) return ['data' => [], 'total' => 0, 'pages' => 0];
+
+        $offset = ($page - 1) * $limit;
+        $statusPlaceholders = implode(',', array_map(function($i) { return ":status_$i"; }, array_keys($statuses)));
+
+        try {
+            // Count query
+            $countQuery = "SELECT COUNT(*) as total 
+                           FROM orders o 
+                           JOIN order_items oi ON o.order_id = oi.order_id 
+                           JOIN katalog k ON oi.produk_id = k.produk_id 
+                           WHERE k.penjual_id = :penjual_id AND o.status_order IN ($statusPlaceholders)";
+            $stmtCount = $conn->prepare($countQuery);
+            $stmtCount->bindValue(':penjual_id', $penjual_id);
+            foreach ($statuses as $i => $status) {
+                $stmtCount->bindValue(":status_$i", $status);
+            }
+            $stmtCount->execute();
+            $total = (int) ($stmtCount->fetch(PDO::FETCH_ASSOC)['total'] ?? 0);
+            $pages = (int) ceil($total / $limit);
+
+            // Data query
+            $query = "SELECT o.*, oi.jumlah, oi.harga_satuan, oi.subtotal, k.nama_produk, k.foto_1, t.metode_pembayaran, t.status_pembayaran, a.nama AS nama_pembeli, a.email AS email_pembeli
+                      FROM orders o 
+                      JOIN order_items oi ON o.order_id = oi.order_id 
+                      JOIN katalog k ON oi.produk_id = k.produk_id 
+                      JOIN transaksi t ON o.order_id = t.order_id 
+                      JOIN akun a ON o.pembeli_id = a.akun_id
+                      WHERE k.penjual_id = :penjual_id AND o.status_order IN ($statusPlaceholders)
+                      ORDER BY o.created_at DESC
+                      LIMIT :limit OFFSET :offset";
+            $stmt = $conn->prepare($query);
+            $stmt->bindValue(':penjual_id', $penjual_id);
+            foreach ($statuses as $i => $status) {
+                $stmt->bindValue(":status_$i", $status);
+            }
+            $stmt->bindValue(':limit', (int) $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
+            $stmt->execute();
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            return [
+                'data' => $data,
+                'total' => $total,
+                'pages' => $pages,
+                'current_page' => $page
+            ];
+        } catch (Exception $e) {
+            error_log("Gagal mengambil list order paginated: " . $e->getMessage());
+            return ['data' => [], 'total' => 0, 'pages' => 0, 'current_page' => $page];
+        }
+    }
+
+    public function countOrdersByPenjual($penjual_id, $statuses)
+    {
+        $conn = $this->db->conn();
+        if (!$conn) return 0;
+
+        $statusPlaceholders = implode(',', array_map(function($i) { return ":status_$i"; }, array_keys($statuses)));
+
+        try {
+            $query = "SELECT COUNT(*) as total 
+                      FROM orders o 
+                      JOIN order_items oi ON o.order_id = oi.order_id 
+                      JOIN katalog k ON oi.produk_id = k.produk_id 
+                      WHERE k.penjual_id = :penjual_id AND o.status_order IN ($statusPlaceholders)";
+            $stmt = $conn->prepare($query);
+            $stmt->bindValue(':penjual_id', $penjual_id);
+            foreach ($statuses as $i => $status) {
+                $stmt->bindValue(":status_$i", $status);
+            }
+            $stmt->execute();
+            return (int) ($stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0);
+        } catch (Exception $e) {
+            return 0;
+        }
+    }
 }

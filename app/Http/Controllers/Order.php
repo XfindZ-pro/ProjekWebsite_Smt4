@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 
 class Order extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         if (!isset($_SESSION['user_akun_id'])) {
             return redirect('/login');
@@ -20,11 +20,34 @@ class Order extends Controller
         }
 
         $orderModel = $this->model('OrderModel');
-        $orders = $orderModel->getOrdersByPenjual($_SESSION['user_akun_id']);
+        
+        $tab = $request->input('tab', 'ongoing');
+        if (!in_array($tab, ['ongoing', 'selesai'])) {
+            $tab = 'ongoing';
+        }
+
+        $page = max(1, intval($request->input('page', 1)));
+        $limit = 10;
+
+        $ongoingStatuses = ['pending', 'diproses', 'dikirim'];
+        $selesaiStatuses = ['selesai', 'dibatalkan'];
+
+        $activeStatuses = ($tab === 'ongoing') ? $ongoingStatuses : $selesaiStatuses;
+
+        $orderData = $orderModel->getOrdersByPenjualPaginated($_SESSION['user_akun_id'], $activeStatuses, $page, $limit);
+        
+        $ongoingCount = $orderModel->countOrdersByPenjual($_SESSION['user_akun_id'], $ongoingStatuses);
+        $selesaiCount = $orderModel->countOrdersByPenjual($_SESSION['user_akun_id'], $selesaiStatuses);
 
         $data['judul'] = 'Order Masuk';
         $data['aktif'] = 'order';
-        $data['orders'] = $orders;
+        $data['orders'] = $orderData['data'];
+        $data['pages'] = $orderData['pages'];
+        $data['current_page'] = $orderData['current_page'];
+        $data['total'] = $orderData['total'];
+        $data['active_tab'] = $tab;
+        $data['ongoing_count'] = $ongoingCount;
+        $data['selesai_count'] = $selesaiCount;
 
         return view('templates.header', $data) .
                view('order.index', $data) .
