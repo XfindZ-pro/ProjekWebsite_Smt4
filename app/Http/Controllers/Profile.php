@@ -35,6 +35,26 @@ class Profile extends Controller
                view('templates.footer');
     }
 
+    public function updateNama(Request $request)
+    {
+        if (!isset($_SESSION['user_akun_id'])) {
+            return redirect('/login');
+        }
+
+        $namaBaru = trim($request->input('nama_baru', ''));
+        if (empty($namaBaru)) {
+            return back()->with('error', 'Nama tidak boleh kosong.');
+        }
+
+        $akunModel = $this->model('AkunModel');
+        if ($akunModel->updateNama($_SESSION['user_akun_id'], $namaBaru)) {
+            $_SESSION['user_nama'] = $namaBaru;
+            return redirect('/profile')->with('success', 'Nama berhasil diperbarui.');
+        }
+
+        return back()->with('error', 'Gagal memperbarui nama.');
+    }
+
     public function updatePhoto(Request $request)
     {
         if (!isset($_SESSION['user_akun_id'])) {
