@@ -108,7 +108,7 @@ class OrderModel
         if (!$conn) return [];
 
         try {
-            $query = "SELECT o.*, oi.jumlah, oi.harga_satuan, oi.subtotal, k.nama_produk, k.foto_1, t.metode_pembayaran, t.status_pembayaran 
+            $query = "SELECT o.*, oi.produk_id, oi.jumlah, oi.harga_satuan, oi.subtotal, k.nama_produk, k.foto_1, t.metode_pembayaran, t.status_pembayaran 
                       FROM orders o 
                       JOIN order_items oi ON o.order_id = oi.order_id 
                       JOIN katalog k ON oi.produk_id = k.produk_id 
@@ -131,7 +131,7 @@ class OrderModel
         if (!$conn) return [];
 
         try {
-            $query = "SELECT o.*, oi.jumlah, oi.harga_satuan, oi.subtotal, k.nama_produk, k.foto_1, t.metode_pembayaran, t.status_pembayaran, a.nama AS nama_pembeli, a.email AS email_pembeli
+            $query = "SELECT o.*, oi.produk_id, oi.jumlah, oi.harga_satuan, oi.subtotal, k.nama_produk, k.foto_1, t.metode_pembayaran, t.status_pembayaran, a.nama AS nama_pembeli, a.email AS email_pembeli
                       FROM orders o 
                       JOIN order_items oi ON o.order_id = oi.order_id 
                       JOIN katalog k ON oi.produk_id = k.produk_id 
@@ -191,7 +191,7 @@ class OrderModel
             $pages = (int) ceil($total / $limit);
 
             // Data query
-            $query = "SELECT o.*, oi.jumlah, oi.harga_satuan, oi.subtotal, k.nama_produk, k.foto_1, t.metode_pembayaran, t.status_pembayaran, a.nama AS nama_pembeli, a.email AS email_pembeli
+            $query = "SELECT o.*, oi.produk_id, oi.jumlah, oi.harga_satuan, oi.subtotal, k.nama_produk, k.foto_1, t.metode_pembayaran, t.status_pembayaran, a.nama AS nama_pembeli, a.email AS email_pembeli
                       FROM orders o 
                       JOIN order_items oi ON o.order_id = oi.order_id 
                       JOIN katalog k ON oi.produk_id = k.produk_id 

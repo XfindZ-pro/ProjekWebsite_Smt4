@@ -14,17 +14,71 @@ class Pesanansaya extends Controller
 
         try {
             $orderModel = $this->model('OrderModel');
+            $reviewModel = $this->model('ReviewModel');
+
             $orders = $orderModel->getOrdersByPembeli($_SESSION['user_akun_id']);
+            $reviews = $reviewModel->getReviewsByPembeli($_SESSION['user_akun_id']);
+
+            // Index reviews by order_id and produk_id for fast lookup in view
+            $indexedReviews = [];
+            foreach ($reviews as $rev) {
+                $key = $rev['order_id'] . '_' . $rev['produk_id'];
+                $indexedReviews[$key] = $rev;
+            }
 
             $data['aktif'] = 'pesanansaya';
             $data['judul'] = 'Pesanan Saya';
             $data['orders'] = $orders;
+            $data['reviews'] = $indexedReviews;
 
             return view('templates.header', $data) .
                    view('pesanansaya.index', $data) .
                    view('templates.footer');
         } catch (\Exception $e) {
             return redirect('/')->with('error', 'Terjadi kesalahan saat memuat halaman Pesanan Saya.');
+        }
+    }
+
+    public function rate(Request $request)
+    {
+        if (!isset($_SESSION['user_akun_id'])) {
+            return redirect('/login');
+        }
+
+        $orderId = $request->input('order_id');
+        $produkId = $request->input('produk_id');
+        $rating = intval($request->input('rating', 0));
+        $komentar = trim($request->input('komentar', ''));
+
+        if (empty($orderId) || empty($produkId) || $rating < 1 || $rating > 5) {
+            return back()->with('error', 'Data ulasan tidak valid.');
+        }
+
+        try {
+            // Check if reviewer is the seller of this product
+            $produkModel = $this->model('ProdukModel');
+            $produk = $produkModel->getProdukById($produkId);
+            if ($produk && $produk['penjual_id'] === $_SESSION['user_akun_id']) {
+                return back()->with('error', 'Anda tidak dapat memberikan ulasan untuk produk Anda sendiri.');
+            }
+
+            $reviewModel = $this->model('ReviewModel');
+            
+            $dataReview = [
+                'order_id' => $orderId,
+                'produk_id' => $produkId,
+                'pembeli_id' => $_SESSION['user_akun_id'],
+                'rating' => $rating,
+                'komentar' => $komentar
+            ];
+
+            if ($reviewModel->addReview($dataReview)) {
+                return back()->with('success', 'Ulasan Anda berhasil disimpan. Terima kasih!');
+            } else {
+                return back()->with('error', 'Gagal menyimpan ulasan. Anda mungkin sudah mengulas produk ini.');
+            }
+        } catch (\Exception $e) {
+            return back()->with('error', 'Terjadi kesalahan sistem saat menyimpan ulasan.');
         }
     }
 }

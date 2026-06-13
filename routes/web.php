@@ -37,6 +37,7 @@ Route::get('/checkout/{id}', [\App\Http\Controllers\Checkout::class, 'index'])->
 Route::post('/checkout/{id}', [\App\Http\Controllers\Checkout::class, 'proses'])->name('checkout.proses');
 
 // User Routes
+Route::get('/tokosaya', [\App\Http\Controllers\Tokosaya::class, 'index'])->name('tokosaya');
 Route::get('/profile', [\App\Http\Controllers\Profile::class, 'index'])->name('profile');
 Route::post('/profile/updatePhoto', [\App\Http\Controllers\Profile::class, 'updatePhoto'])->name('profile.updatePhoto');
 Route::post('/profile/updateNama', [\App\Http\Controllers\Profile::class, 'updateNama'])->name('profile.updateNama');
@@ -47,6 +48,7 @@ Route::get('/produksaya/edit/{id}', [\App\Http\Controllers\Produksaya::class, 'e
 Route::post('/produksaya/update', [\App\Http\Controllers\Produksaya::class, 'update'])->name('produksaya.update');
 Route::get('/produksaya/hapus/{id}', [\App\Http\Controllers\Produksaya::class, 'hapus'])->name('produksaya.hapus');
 Route::get('/pesanansaya', [\App\Http\Controllers\Pesanansaya::class, 'index'])->name('pesanansaya');
+Route::post('/pesanansaya/rate', [\App\Http\Controllers\Pesanansaya::class, 'rate'])->name('pesanansaya.rate');
 Route::get('/order', [\App\Http\Controllers\Order::class, 'index'])->name('order');
 Route::post('/order/respon/{order_id}', [\App\Http\Controllers\Order::class, 'respon'])->name('order.respon');
 Route::get('/verifikasiakun', [\App\Http\Controllers\Verifikasiakun::class, 'index'])->name('verifikasiakun');

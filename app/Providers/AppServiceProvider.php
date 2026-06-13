@@ -38,6 +38,23 @@ class AppServiceProvider extends ServiceProvider
             if (!array_key_exists('db_status', $data)) {
                 $data['db_status'] = true; // Assume true or implement custom check if Database class exists
             }
+
+            // Share verification status with all views
+            if (!array_key_exists('status_verifikasi_user', $data)) {
+                $statusVerifikasi = 'tanpa_verifikasi';
+                if (isset($_SESSION['user_akun_id'])) {
+                    $modelPath = app_path('Models/AkunModel.php');
+                    if (file_exists($modelPath)) {
+                        require_once $modelPath;
+                        $akunModel = new \AkunModel();
+                        $user = $akunModel->getAkunById($_SESSION['user_akun_id']);
+                        if ($user) {
+                            $statusVerifikasi = $user['status_verifikasi'] ?? 'tanpa_verifikasi';
+                        }
+                    }
+                }
+                $data['status_verifikasi_user'] = $statusVerifikasi;
+            }
             
             $view->with('data', $data);
         });

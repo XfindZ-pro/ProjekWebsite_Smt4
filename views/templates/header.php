@@ -38,6 +38,9 @@
                     <?php if ($isAdmin) : ?>
                         <a href="<?= BASEURL; ?>/dashboardadmin" class="<?= ($data['aktif'] == 'dashboardadmin') ? 'text-emerald-600 font-bold border-b-2 border-emerald-600 pb-1' : 'text-slate-600 hover:text-emerald-600 font-medium transition pb-1' ?>">Admin</a>
                     <?php endif; ?>
+                    <?php if (isset($data['status_verifikasi_user']) && $data['status_verifikasi_user'] === 'disetujui') : ?>
+                        <a href="<?= BASEURL; ?>/tokosaya" class="<?= ($data['aktif'] == 'tokosaya') ? 'text-emerald-600 font-bold border-b-2 border-emerald-600 pb-1' : 'text-slate-600 hover:text-emerald-600 font-medium transition pb-1' ?>">Toko Saya</a>
+                    <?php endif; ?>
                 </div>
                 
                 <div class="hidden md:flex items-center space-x-4">
@@ -90,6 +93,9 @@
                 <a href="<?= BASEURL; ?>" class="block px-3 py-2 rounded-md text-base font-medium <?= ($data['aktif'] == 'beranda') ? 'text-emerald-600 bg-emerald-50' : 'text-slate-600 hover:text-emerald-600 hover:bg-slate-50' ?>">Beranda</a>
                 <a href="<?= BASEURL; ?>/katalog" class="block px-3 py-2 rounded-md text-base font-medium <?= ($data['aktif'] == 'katalog') ? 'text-emerald-600 bg-emerald-50' : 'text-slate-600 hover:text-emerald-600 hover:bg-slate-50' ?>">Mitra</a>
                 <a href="<?= BASEURL; ?>/tentang" class="block px-3 py-2 rounded-md text-base font-medium <?= ($data['aktif'] == 'tentang') ? 'text-emerald-600 bg-emerald-50' : 'text-slate-600 hover:text-emerald-600 hover:bg-slate-50' ?>">Tentang Kami</a>
+                <?php if (isset($data['status_verifikasi_user']) && $data['status_verifikasi_user'] === 'disetujui') : ?>
+                    <a href="<?= BASEURL; ?>/tokosaya" class="block px-3 py-2 rounded-md text-base font-medium <?= ($data['aktif'] == 'tokosaya') ? 'text-emerald-600 bg-emerald-50' : 'text-slate-600 hover:text-emerald-600 hover:bg-slate-50' ?>">Toko Saya</a>
+                <?php endif; ?>
                 
                 <div class="border-t border-slate-100 pt-4 flex flex-col space-y-3">
                     <?php if(isset($_SESSION['user_nama'])) : ?>
