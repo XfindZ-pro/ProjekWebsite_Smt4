@@ -287,7 +287,11 @@ document.addEventListener('DOMContentLoaded', () => {
             submitBtn.textContent = 'Memproses...';
 
             const formData = new FormData(checkoutForm);
-            const url = '<?= BASEURL; ?>/checkout/<?= $data['produk']['produk_id']; ?>';
+            let baseUrl = '<?= BASEURL; ?>';
+            if (window.location.protocol === 'https:') {
+                baseUrl = baseUrl.replace('http:', 'https:');
+            }
+            const url = `${baseUrl}/checkout/<?= $data['produk']['produk_id']; ?>`;
 
             fetch(url, {
                 method: 'POST',

@@ -7,7 +7,9 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Define base constants for legacy code compatibility
 if (!defined('BASEURL')) {
-    $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://";
+    $isHttps = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') || 
+               (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+    $protocol = ($isHttps ? "https" : "http") . "://";
     $host = $_SERVER['HTTP_HOST'];
     define('BASEURL', $protocol . $host);
 }
