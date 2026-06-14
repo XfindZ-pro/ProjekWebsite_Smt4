@@ -124,21 +124,83 @@
                             ?>
                             <?php if ($hasReview): ?>
                                 <div class="mt-4 pt-4 border-t border-slate-100 bg-slate-50/50 rounded-2xl p-4">
-                                    <p class="font-bold text-slate-800 text-sm mb-2">Ulasan Anda:</p>
-                                    <div class="flex items-center gap-1 text-amber-400 mb-2">
-                                        <?php for ($i = 1; $i <= 5; $i++): ?>
-                                            <?php if ($i <= $review['rating']): ?>
-                                                <span class="text-lg">★</span>
-                                            <?php else: ?>
-                                                <span class="text-lg text-slate-300">★</span>
-                                            <?php endif; ?>
-                                        <?php endfor; ?>
+                                    <!-- View Mode -->
+                                    <div id="review-view-<?= $order['order_id']; ?>">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <p class="font-bold text-slate-800 text-sm">Ulasan Anda:</p>
+                                            <button type="button" onclick="showEditReview('<?= $order['order_id']; ?>')" class="text-xs font-bold text-emerald-600 hover:text-emerald-700 transition">
+                                                Edit Ulasan
+                                            </button>
+                                        </div>
+                                        <div class="flex items-center gap-1 text-amber-400 mb-2">
+                                            <?php for ($i = 1; $i <= 5; $i++): ?>
+                                                <?php if ($i <= $review['rating']): ?>
+                                                    <span class="text-lg">★</span>
+                                                <?php else: ?>
+                                                    <span class="text-lg text-slate-300">★</span>
+                                                <?php endif; ?>
+                                            <?php endfor; ?>
+                                        </div>
+                                        <?php if (!empty($review['komentar'])): ?>
+                                            <p class="text-slate-600 text-sm italic">"<?= htmlspecialchars($review['komentar']); ?>"</p>
+                                        <?php else: ?>
+                                            <p class="text-slate-400 text-xs italic">Tidak ada komentar.</p>
+                                        <?php endif; ?>
+                                        
+                                        <!-- Edited Indicator -->
+                                        <?php if (strtotime($review['updated_at']) > strtotime($review['created_at'])): ?>
+                                            <p class="text-[10px] text-slate-400 mt-2 font-medium">
+                                                (edited) Diubah pada <?= date('d M Y, H:i', strtotime($review['updated_at'])); ?>
+                                            </p>
+                                        <?php endif; ?>
                                     </div>
-                                    <?php if (!empty($review['komentar'])): ?>
-                                        <p class="text-slate-600 text-sm italic">"<?= htmlspecialchars($review['komentar']); ?>"</p>
-                                    <?php else: ?>
-                                        <p class="text-slate-400 text-xs italic">Tidak ada komentar.</p>
-                                    <?php endif; ?>
+
+                                    <!-- Edit Mode Form (Hidden by default) -->
+                                    <div id="review-edit-<?= $order['order_id']; ?>" class="hidden">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <p class="font-bold text-slate-800 text-sm">Edit Ulasan:</p>
+                                            <button type="button" onclick="hideEditReview('<?= $order['order_id']; ?>')" class="text-xs font-bold text-slate-500 hover:text-slate-600 transition">
+                                                Batal
+                                            </button>
+                                        </div>
+                                        <form action="<?= BASEURL; ?>/pesanansaya/rate" method="POST" class="space-y-4">
+                                            <?= csrf_field(); ?>
+                                            <input type="hidden" name="order_id" value="<?= $order['order_id']; ?>">
+                                            <input type="hidden" name="produk_id" value="<?= $order['produk_id']; ?>">
+                                            
+                                            <!-- Star Rating Input -->
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-xs text-slate-500 font-medium">Rating:</span>
+                                                <div class="flex flex-row-reverse justify-end gap-1 star-rating">
+                                                    <input type="radio" id="edit_star5_<?= $order['order_id']; ?>" name="rating" value="5" class="sr-only" <?= $review['rating'] == 5 ? 'checked' : ''; ?> required />
+                                                    <label for="edit_star5_<?= $order['order_id']; ?>" class="cursor-pointer text-2xl text-slate-300 transition">★</label>
+
+                                                    <input type="radio" id="edit_star4_<?= $order['order_id']; ?>" name="rating" value="4" class="sr-only" <?= $review['rating'] == 4 ? 'checked' : ''; ?> required />
+                                                    <label for="edit_star4_<?= $order['order_id']; ?>" class="cursor-pointer text-2xl text-slate-300 transition">★</label>
+
+                                                    <input type="radio" id="edit_star3_<?= $order['order_id']; ?>" name="rating" value="3" class="sr-only" <?= $review['rating'] == 3 ? 'checked' : ''; ?> required />
+                                                    <label for="edit_star3_<?= $order['order_id']; ?>" class="cursor-pointer text-2xl text-slate-300 transition">★</label>
+
+                                                    <input type="radio" id="edit_star2_<?= $order['order_id']; ?>" name="rating" value="2" class="sr-only" <?= $review['rating'] == 2 ? 'checked' : ''; ?> required />
+                                                    <label for="edit_star2_<?= $order['order_id']; ?>" class="cursor-pointer text-2xl text-slate-300 transition">★</label>
+
+                                                    <input type="radio" id="edit_star1_<?= $order['order_id']; ?>" name="rating" value="1" class="sr-only" <?= $review['rating'] == 1 ? 'checked' : ''; ?> required />
+                                                    <label for="edit_star1_<?= $order['order_id']; ?>" class="cursor-pointer text-2xl text-slate-300 transition">★</label>
+                                                </div>
+                                            </div>
+
+                                            <!-- Comment input -->
+                                            <div>
+                                                <textarea name="komentar" rows="2" placeholder="Tulis komentar Anda..." class="w-full text-sm rounded-xl border border-slate-200 bg-white px-4 py-2.5 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition shadow-sm"><?= htmlspecialchars($review['komentar']); ?></textarea>
+                                            </div>
+
+                                            <div class="flex justify-end">
+                                                <button type="submit" class="rounded-full bg-emerald-600 px-5 py-2 font-bold text-xs text-white hover:bg-emerald-700 transition shadow-sm active:scale-95">
+                                                    Simpan Perubahan
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
                                 </div>
                             <?php else: ?>
                                 <div class="mt-4 pt-4 border-t border-slate-100 bg-slate-50/50 rounded-2xl p-4">
@@ -199,3 +261,15 @@
         color: #f59e0b; /* amber-500 */
     }
 </style>
+
+<script>
+function showEditReview(orderId) {
+    document.getElementById('review-view-' + orderId).classList.add('hidden');
+    document.getElementById('review-edit-' + orderId).classList.remove('hidden');
+}
+
+function hideEditReview(orderId) {
+    document.getElementById('review-view-' + orderId).classList.remove('hidden');
+    document.getElementById('review-edit-' + orderId).classList.add('hidden');
+}
+</script>

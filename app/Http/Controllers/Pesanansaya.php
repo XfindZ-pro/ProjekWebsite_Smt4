@@ -72,10 +72,24 @@ class Pesanansaya extends Controller
                 'komentar' => $komentar
             ];
 
-            if ($reviewModel->addReview($dataReview)) {
-                return back()->with('success', 'Ulasan Anda berhasil disimpan. Terima kasih!');
+            // Check if review already exists for this order & product
+            $existing = $reviewModel->getReviewByOrderAndProduct($orderId, $produkId);
+            if ($existing) {
+                // Ensure owner match
+                if ($existing['pembeli_id'] !== $_SESSION['user_akun_id']) {
+                    return back()->with('error', 'Anda tidak memiliki akses untuk mengubah ulasan ini.');
+                }
+                if ($reviewModel->updateReview($dataReview)) {
+                    return back()->with('success', 'Ulasan Anda berhasil diperbarui.');
+                } else {
+                    return back()->with('error', 'Gagal memperbarui ulasan.');
+                }
             } else {
-                return back()->with('error', 'Gagal menyimpan ulasan. Anda mungkin sudah mengulas produk ini.');
+                if ($reviewModel->addReview($dataReview)) {
+                    return back()->with('success', 'Ulasan Anda berhasil disimpan. Terima kasih!');
+                } else {
+                    return back()->with('error', 'Gagal menyimpan ulasan.');
+                }
             }
         } catch (\Exception $e) {
             return back()->with('error', 'Terjadi kesalahan sistem saat menyimpan ulasan.');

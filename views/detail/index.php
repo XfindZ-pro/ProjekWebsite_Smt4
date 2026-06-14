@@ -240,7 +240,12 @@
                                              class="w-10 h-10 rounded-full object-cover bg-slate-200">
                                         <div>
                                             <p class="font-bold text-slate-800 text-sm"><?= htmlspecialchars($review['nama_pembeli']); ?></p>
-                                            <p class="text-xs text-slate-400"><?= date('d M Y, H:i', strtotime($review['created_at'])); ?></p>
+                                            <p class="text-xs text-slate-400">
+                                                <?= date('d M Y, H:i', strtotime($review['created_at'])); ?>
+                                                <?php if (strtotime($review['updated_at']) > strtotime($review['created_at'])): ?>
+                                                    <span class="text-[10px] text-slate-400 ml-1.5 font-semibold hover:text-slate-500 cursor-help" title="Diubah pada <?= date('d M Y, H:i', strtotime($review['updated_at'])); ?>">(edited)</span>
+                                                <?php endif; ?>
+                                            </p>
                                         </div>
                                     </div>
 

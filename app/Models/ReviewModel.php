@@ -117,5 +117,44 @@ class ReviewModel
             return ['rating' => 0.0, 'count' => 0];
         }
     }
+
+    public function getReviewByOrderAndProduct($order_id, $produk_id)
+    {
+        $conn = $this->db->conn();
+        if (!$conn) return null;
+
+        try {
+            $query = "SELECT * FROM reviews WHERE order_id = :order_id AND produk_id = :produk_id LIMIT 1";
+            $stmt = $conn->prepare($query);
+            $stmt->bindParam(':order_id', $order_id);
+            $stmt->bindParam(':produk_id', $produk_id);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            return null;
+        }
+    }
+
+    public function updateReview($data)
+    {
+        $conn = $this->db->conn();
+        if (!$conn) return false;
+
+        try {
+            $query = "UPDATE reviews 
+                      SET rating = :rating, komentar = :komentar, updated_at = NOW() 
+                      WHERE order_id = :order_id AND produk_id = :produk_id AND pembeli_id = :pembeli_id";
+            $stmt = $conn->prepare($query);
+            $stmt->bindParam(':order_id', $data['order_id']);
+            $stmt->bindParam(':produk_id', $data['produk_id']);
+            $stmt->bindParam(':pembeli_id', $data['pembeli_id']);
+            $stmt->bindParam(':rating', $data['rating'], PDO::PARAM_INT);
+            $stmt->bindValue(':komentar', $data['komentar']);
+            return $stmt->execute();
+        } catch (Exception $e) {
+            error_log("Gagal memperbarui ulasan: " . $e->getMessage());
+            return false;
+        }
+    }
 }
 

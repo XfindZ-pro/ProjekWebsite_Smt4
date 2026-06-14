@@ -1988,3 +1988,20 @@
 #49 D:/Kuliah/Semester 4/Pemweb/Projek/vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php(16): require_once('D://Kuliah//Semes...')
 #50 {main}
 "} 
+[2026-06-14 14:14:29] laravel.EMERGENCY: Unable to create configured logger. Using emergency logger. {"exception":"[object] (InvalidArgumentException(code: 0): Log [] is not defined. at D:/Kuliah/Semester 4/Pemweb/Projek/vendor/laravel/framework/src/Illuminate/Log/LogManager.php:212)
+[stacktrace]
+#0 D:/Kuliah/Semester 4/Pemweb/Projek/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(137): Illuminate/Log/LogManager->resolve(NULL, NULL)
+#1 D:/Kuliah/Semester 4/Pemweb/Projek/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(124): Illuminate/Log/LogManager->get(NULL)
+#2 D:/Kuliah/Semester 4/Pemweb/Projek/vendor/laravel/framework/src/Illuminate/Log/LogManager.php(681): Illuminate/Log/LogManager->driver()
+#3 D:/Kuliah/Semester 4/Pemweb/Projek/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(317): Illuminate/Log/LogManager->error('Class \"ReviewMo...', Array)
+#4 D:/Kuliah/Semester 4/Pemweb/Projek/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(278): Illuminate/Foundation/Exceptions/Handler->reportThrowable(Object(Error))
+#5 D:/Kuliah/Semester 4/Pemweb/Projek/vendor/nunomaduro/collision/src/Adapters/Laravel/ExceptionHandler.php(46): Illuminate/Foundation/Exceptions/Handler->report(Object(Error))
+#6 D:/Kuliah/Semester 4/Pemweb/Projek/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(183): NunoMaduro/Collision/Adapters/Laravel/ExceptionHandler->report(Object(Error))
+#7 D:/Kuliah/Semester 4/Pemweb/Projek/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(255): Illuminate/Foundation/Bootstrap/HandleExceptions->handleException(Object(Error))
+#8 [internal function]: Illuminate/Foundation/Bootstrap/HandleExceptions->{closure:Illuminate/Foundation/Bootstrap/HandleExceptions::forwardsTo():254}(Object(Error))
+#9 {main}
+"} 
+[2026-06-14 14:14:29] laravel.ERROR: Class "ReviewModel" not found {"exception":"[object] (Error(code: 0): Class \"ReviewModel\" not found at C:/Users/findo/.gemini/antigravity-ide/brain/e5a66f54-c4c1-4671-bac1-156b416d446d/scratch/test_edit_review.php:79)
+[stacktrace]
+#0 {main}
+"} 
